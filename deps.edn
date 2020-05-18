@@ -1,0 +1,25 @@
+{:paths
+ ["src" "test" "classes" "resources"]
+
+ :mvn/repos
+ {"basex" {:url "http://files.basex.org/maven"}}
+
+ :deps
+ {org.clojure/clojure {:mvn/version "1.10.1"}
+  org.clojure/clojurescript {:mvn/version "1.10.520"}
+  org.clojure/core.async {:mvn/version "1.0.567"}
+  org.clojure/core.match {:mvn/version "1.0.0"}
+
+  ; Misc
+  metosin/reitit {:mvn/version "0.4.2"}
+  expound {:mvn/version "0.8.4"}
+
+  ; XML
+  net.sf.saxon/Saxon-HE {:mvn/version "10.1"}
+  name.dmaus.schxslt/schxslt {:mvn/version "1.3.1"}
+  org.relaxng/jing {:mvn/version "20181222"}
+  org.basex/basex {:mvn/version "9.3.3"}
+
+  ; To generate an uberjar
+  uberdeps {:mvn/version "0.1.10"}
+  }}

@@ -1,0 +1,27 @@
+(ns rainbowfish.xmldb
+  (:require rainbowfish.xslt-factory)
+  (:import
+   [org.basex BaseXServer BaseXGUI]
+   [org.basex.api.client ClientSession]))
+
+(defonce server
+  "Instance of the BaseX DB server for the lifetime of the program"
+  (do
+    ; Inform JAXP APIs of rainbowfish's XSLT factory before calling
+    ; BaseX code.
+    (System/setProperty
+      "javax.xml.transform.TransformerFactory",
+      "rainbowfish.XsltFactory")
+
+    (BaseXServer. (make-array String 0))))
+
+(def context
+  "Every function that runs locally should use the same context, for
+  multithreading coordination"
+  (.context server))
+
+(defn launch-gui
+  "The GUI doesn't take a context since it can connect to the local
+  server with its own context."
+  []
+  (BaseXGUI (make-array String 0)))
