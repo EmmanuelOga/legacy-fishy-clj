@@ -5,7 +5,7 @@
   "Main program options"
   {:root "c:/Users/emman/workspace/projects/eogadev"})
 
-(def relpath
+(defn relpath
   "Return a path relative to the root path of the project files"
   [& paths]
   (->
