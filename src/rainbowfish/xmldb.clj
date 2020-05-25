@@ -16,11 +16,6 @@
     ; Launch server.
     (BaseXServer. (make-array String 0))))
 
-(def context
-  "Every function that runs locally should use the same context, for
-  multithreading coordination"
-  (.context server))
-
 (defn launch-gui
   "The GUI doesn't take a context since it can connect to the local
   server with its own context."

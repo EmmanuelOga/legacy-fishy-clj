@@ -10,6 +10,9 @@
   org.clojure/core.async {:mvn/version "1.0.567"}
   org.clojure/core.match {:mvn/version "1.0.0"}
 
+  ; HTTP/d stuff
+  ring/ring {:mvn/version "1.8.1"}
+
   ; Misc
   metosin/reitit {:mvn/version "0.4.2"}
   expound {:mvn/version "0.8.4"}
