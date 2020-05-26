@@ -22,8 +22,8 @@
     ; Inform JAXP APIs of rainbowfish's XSLT factory before calling
     ; BaseX code.
     (System/setProperty
-      "javax.xml.transform.TransformerFactory",
-      "rainbowfish.XsltFactory")
+     "javax.xml.transform.TransformerFactory",
+     "rainbowfish.XsltFactory")
     (atom nil)))
 
 (defn stop
@@ -54,7 +54,7 @@
   (let [o options]
     (ClientSession. (:host o) (:port o) (:user o) (:password o))))
 
-(defn call
+(defn open
   "Opens a BaseX session and calls the callback with it"
   [callback]
   (with-open [session (create-session)]
@@ -63,20 +63,24 @@
 (defn fire
   "Opens a BaseX session and runs a single string command"
   [& args]
-  (call (fn [sess] (.execute sess (apply str args)))))
+  (open (fn [sess] (.execute sess (apply str args)))))
 
 (defn query
-  "Opens a query that can be `.bind` to values and `.execute`d.
-  Example:
-  (query sess \"...\"
-              (fn [q] (.bind q \"$var\" \"42\" \"xs:integer\")
-                      (.execute q)))"
-  [session input callback]
-  (with-open [query (.query session input)]
-    (callback query)))
+  "Runs a query.
+  `(query
+    \"...xquery...\"
+    [[\"$extern-name\" value \"xs:string\"]]
+    (fn [q] (.bind q \"$var\" \"42\" \"xs:integer\")
+            (.execute q)))`"
+  ([xq]
+   (query xq [] (fn [q sess] (.execute q))))
+  ([xq bindings]
+   (query xq bindings (fn [q sess] (.execute q))))
+  ([xq bindings callback]
+   (open (fn [sess]
+           (with-open [query (.query sess xq)]
+             ; Bind any parameters.
+             (run! (fn [[varname value typename]]
+                     (.bind query varname value typename)) bindings)
+             (callback query sess))))))
 
-(defn fire-query
-  "Runs a single `query`"
-  [input callback]
-  (call (fn [sess] (query sess input callback))))
-    

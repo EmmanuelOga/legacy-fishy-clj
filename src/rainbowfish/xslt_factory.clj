@@ -16,5 +16,5 @@
   configuration purposes (for example, adding extension functions)."
   [this & args]
   (let [processor (.getProcessor this)]
-    (println "JAXP XSLT initialized with processor:\n" processor)
-    (println "Extending processor with functions:\n" extension-functions)))
+    ; TODO: add extension functions.
+    ))

@@ -24,16 +24,19 @@
   "Renders a topic given a path.
   Dispatches to BaseX, which should find and render the topic."
   [path]
-  (xmldb/fire-query
+  (xmldb/query
    (slurp (rainbowfish.cli/relpath "system/topics.xq"))
-   (fn [q]
-     (.bind q "$name" (last (clojure.string/split path #"/")) "xs:string")
-     (.execute q))))
+   [["$root-path"     (cli/options :root)          "xs:string"]
+    ["$database-name" (cli/options :database-name) "xs:string"]
+    ["$topic-name"    path                         "xs:string"]
+    ["$previewing"    false                        "xs:boolean"]]))
 
 (defn handler [req]
   (if-let [topic (path-to-topic (req/path-info req))]
-      (resp/response (render-topic topic))
-      (resp/not-found "Missing")))
+    (->
+     (resp/response (render-topic topic))
+     (resp/content-type "application/xml"))
+    (resp/not-found "Missing")))
 
 (def app
   "Rainbowfish ring application."
