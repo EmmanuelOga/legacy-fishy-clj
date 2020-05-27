@@ -35,7 +35,7 @@
   (if-let [topic (path-to-topic (req/path-info req))]
     (->
      (resp/response (render-topic topic))
-     (resp/content-type "application/xml"))
+     (resp/content-type "text/html"))
     (resp/not-found "Missing")))
 
 (def app
