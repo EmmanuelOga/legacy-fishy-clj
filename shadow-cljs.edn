@@ -1,0 +1,19 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src"]
+
+ :dependencies
+ []
+
+ :dev-http
+ {8000 ["sites/eogadev/static" "sites/emmanueloga/static"]}
+ 
+ :builds
+ {:app {:target :browser
+        :output-dir "shadow/rfjs"
+        :asset-path "/rfjs"
+        :modules
+        {:main
+         {:entries [rainbowfish.client]
+          :init-fn rainbowfish.client/init
+          :devtools {:after-load rainbowfish.client/reload}}}}}}

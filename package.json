@@ -1,0 +1,12 @@
+{
+  "name": "rainbowfish",
+  "version": "0.0.1",
+  "description": "Rainbowfish Client Code",
+  "main": "index.js",
+  "repository": "https://github.com/EmmanuelOga/rainbowfish.git",
+  "author": "Emmanuel Oga <contact@emmanueloga.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "shadow-cljs": "^2.9.10"
+  }
+}
