@@ -1,0 +1,9 @@
+{:basex-path
+ "./basex"
+ :sites
+ [{:path "eogadev"
+   :xmldb "devoga"
+   :hosts ["eogadev" "eoga.dev"]}
+   {:path "emmanueloga"
+    :xmldb "comoga"
+    :hosts ["emmanueloga" "emmanueloga.com"]}]}

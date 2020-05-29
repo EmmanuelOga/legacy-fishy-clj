@@ -42,4 +42,5 @@
   "Rainbowfish ring application."
   (-> handler
       sess/wrap-session
+      (ring-file/wrap-file "shadow")
       (ring-file/wrap-file (cli/relpath "static"))))

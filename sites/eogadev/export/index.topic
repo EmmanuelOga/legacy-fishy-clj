@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topic xmlns="https://eoga.dev/sdoc" root="true">
+  <title>Machinations</title>
+  <author>Emmanuel Oga</author>
+  <date>2020-05-31</date>
+
+  <description>
+    <p>
+      Website of @author, a Software Developer based in San
+      Francisco, California.
+    </p>
+  </description>
+
+  <header>
+    <p>
+      Welcome!
+    </p>
+  </header>
+
+  <body>
+    <p>
+      This site is a knowledge base.
+    </p>
+  </body>
+
+  <footer>
+    <p>
+      Content is licensed under the
+
+      <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">
+        Creative Commons Attribution 4.0 International License
+      </a>
+
+      <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">
+        <img alt="Creative Commons License"
+             src="https://i.creativecommons.org/l/by/4.0/80x15.png" />
+      </a>
+
+      Powered by @Rainbowfish
+    </p>
+  </footer>
+</topic>

@@ -1,0 +1,20 @@
+:root {
+  --color-bg: rgba(240, 240, 212, 1);
+  --color-fg: black;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Segoe UI, Sitka Text, serif;
+  line-height: 1.5;
+
+  color: var(--color-fg);
+  background-color: var(--color-bg);
+
+  margin: 0;
+  padding: 0;
+}
+
