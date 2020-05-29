@@ -1,14 +1,11 @@
 (ns rainbowfish.xmldb
-  (:require [clojure.java.io :as io]
-            [rainbowfish.cli :as cli]
-            rainbowfish.xslt-factory)
+  (:require [rainbowfish.config :as config])
   (:import [org.basex BaseXGUI BaseXServer]
-           org.basex.api.client.ClientSession
-           org.basex.core.cmd.Add))
+           org.basex.api.client.ClientSession))
 
 (def ^:dynamic options
   "BaseX Database Options"
-  {:root (cli/relpath "data/xmldb")
+  {:root (:basex-path @config/config)
    :host "localhost"
    :port 1984
    :user "admin"

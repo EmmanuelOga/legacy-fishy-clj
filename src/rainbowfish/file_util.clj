@@ -9,5 +9,6 @@
    (Paths/get root (into-array String paths))
    (.toAbsolutePath)
    (.normalize)
-   (.toString)))
+   (.toString)
+   (.replace "\\" "/")))
 

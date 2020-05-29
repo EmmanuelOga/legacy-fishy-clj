@@ -1,6 +1,5 @@
 (ns rainbowfish.http-app
   (:require [clojure.string :as str]
-            [rainbowfish.cli :as cli]
             [rainbowfish.xmldb :as xmldb]
             [ring.middleware.file :as ring-file]
             [ring.middleware.session :as sess]
@@ -23,24 +22,23 @@
 (defn render-topic
   "Renders a topic given a path.
   Dispatches to BaseX, which should find and render the topic."
-  [path]
+  [site-path db-name topic-path]
   (xmldb/query
-   (slurp (rainbowfish.cli/relpath "system/topics.xq"))
-   [["$root-path"     (cli/options :root)          "xs:string"]
-    ["$database-name" (cli/options :database-name) "xs:string"]
-    ["$topic-name"    path                         "xs:string"]
-    ["$previewing"    false                        "xs:boolean"]]))
+   #_(slurp (rainbowfish.cli/relpath "system/topics.xq"))
+   ""
+   [["$root-path"     site-path  "xs:string"]
+    ["$database-name" db-name    "xs:string"]
+    ["$topic-name"    topic-path "xs:string"]
+    ["$previewing"    false      "xs:boolean"]]))
 
 (defn handler [req]
-  (if-let [topic (path-to-topic (req/path-info req))]
+  (let [host (:server-name req)
+        topic (path-to-topic (req/path-info req))]
     (->
-     (resp/response (render-topic topic))
-     (resp/content-type "text/html"))
-    (resp/not-found "Missing")))
+     (resp/response (str host topic)#_(render-topic topic))
+     (resp/content-type "text/html"))))
 
 (def app
   "Rainbowfish ring application."
   (-> handler
-      sess/wrap-session
-      (ring-file/wrap-file "shadow")
-      (ring-file/wrap-file (cli/relpath "static"))))
+      sess/wrap-session))
