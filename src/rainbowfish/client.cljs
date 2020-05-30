@@ -4,6 +4,9 @@
   []
   (.log js/console "Ready!!!"))
 
-(defn reload
-  []
-  (.log js/console "Reloaded."))
+(defn ^:dev/after-load start []
+  (js/console.log "start"))
+
+(defn ^:dev/before-load stop []
+  (js/console.log "stop"))
+
