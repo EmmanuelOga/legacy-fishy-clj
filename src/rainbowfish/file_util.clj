@@ -1,5 +1,4 @@
 (ns rainbowfish.file-util
-  (:require [rainbowfish.config :as config])
   (:import java.nio.file.Paths))
 
 (defn relpath

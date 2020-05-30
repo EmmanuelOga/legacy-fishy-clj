@@ -21,4 +21,4 @@
   (swap! server
          (fn [old-server]
            (when old-server (.stop old-server))
-           (run-jetty http/app options))))
+           (run-jetty (http/app) options))))

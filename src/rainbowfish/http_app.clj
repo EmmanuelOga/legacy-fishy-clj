@@ -4,7 +4,8 @@
             [ring.middleware.file :as ring-file]
             [ring.middleware.session :as sess]
             [ring.util.request :as req]
-            [ring.util.response :as resp]))
+            [ring.util.response :as resp]
+            [rainbowfish.config :as config]))
 
 (defn session-test [{session :session}]
   (let [n (session :n 1)]
@@ -31,14 +32,23 @@
     ["$topic-name"    topic-path "xs:string"]
     ["$previewing"    false      "xs:boolean"]]))
 
-(defn handler [req]
-  (let [host (:server-name req)
-        topic (path-to-topic (req/path-info req))]
-    (->
-     (resp/response (str host topic)#_(render-topic topic))
-     (resp/content-type "text/html"))))
+(defn handler
+  "Rainbowfish's main HTTP request handler."
+  [req]
+  (let [host (:server-name req)]
+    (if-let [{:keys [assets-path xmldb]} (get-in config/config [:hosts host])]
+      (let [info {:host host
+                  :assets-path assets-path
+                  :xmldb xmldb
+                  :topic (path-to-topic (req/path-info req))}]
+        (or (ring-file/file-request req assets-path)
+            (->
+             (resp/response (str info))
+             (resp/content-type "text/html"))))
+      (resp/not-found "Resource not found."))))
 
-(def app
+(defn app
   "Rainbowfish ring application."
+  []
   (-> handler
       sess/wrap-session))
