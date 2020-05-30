@@ -27,6 +27,7 @@
      (edn/read-string (slurp config-path)))
     {}))
 
-(def ^:dynamic config
+(defn ^:dynamic config
   "Process wide configuration"
+  []
   (read-config "sites/rainbowfish.edn"))

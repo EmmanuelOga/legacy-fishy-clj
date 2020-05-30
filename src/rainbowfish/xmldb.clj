@@ -5,7 +5,7 @@
 
 (def ^:dynamic options
   "BaseX Database Options"
-  {:root (:basex-path @config/config)
+  {:root (:basex-path (config/config))
    :host "localhost"
    :port 1984
    :user "admin"

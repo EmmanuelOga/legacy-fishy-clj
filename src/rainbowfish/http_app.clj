@@ -35,7 +35,8 @@
 (defn handler
   "Rainbowfish's main HTTP request handler."
   [req]
-  (let [host (:server-name req)]
+  (let [host (or (:x-forwarded-server req)
+                 (:server-name req))]
     (if-let [{:keys [assets-path xmldb]} (get-in config/config [:hosts host])]
       (let [info {:host host
                   :assets-path assets-path
@@ -45,7 +46,7 @@
             (->
              (resp/response (str info))
              (resp/content-type "text/html"))))
-      (resp/not-found "Resource not found."))))
+      (resp/not-found (str "Resource not found: " req)))))
 
 (defn app
   "Rainbowfish ring application."
