@@ -6,9 +6,9 @@
  []
 
  :dev-http
- {8000 {:root "resources/public/"
+ {8000 {:roots ["shadow/" "resources/public/"]
         :proxy-url "http://localhost:9876"}}
- 
+
  :builds
  {:app {:target :browser
         :output-dir "shadow/rfjs"

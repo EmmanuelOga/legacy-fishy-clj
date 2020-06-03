@@ -2,11 +2,11 @@
 
 (defn init
   []
-  (.log js/console "Ready!!!"))
+  (.log js/console "Ready."))
 
 (defn ^:dev/after-load start []
-  (js/console.log "start"))
+  (js/console.log "Start"))
 
 (defn ^:dev/before-load stop []
-  (js/console.log "stop"))
+  (js/console.log "Stop"))
 

@@ -5,8 +5,10 @@
             [rainbowfish.xmldb :as xmldb]
             [ring.middleware.file :as ring-file]
             [ring.middleware.session :as sess]
+            [ring.middleware.params :as params]
             [ring.util.request :as req]
-            [ring.util.response :as resp]))
+            [ring.util.response :as resp]
+            [clojure.java.io :as io]))
 
 (defn session-test [{session :session}]
   (let [n (session :n 1)]
@@ -23,35 +25,62 @@
 (defn render-topic
   "Renders a topic given a path.
   Dispatches to BaseX, which should find and render the topic."
-  [site-path db-name topic-path]
-  (xmldb/query
-   #_(slurp (rainbowfish.cli/relpath "system/topics.xq"))
-   ""
-   [["$root-path"     site-path  "xs:string"]
-    ["$database-name" db-name    "xs:string"]
-    ["$topic-name"    topic-path "xs:string"]
-    ["$previewing"    false      "xs:boolean"]]))
+  [{:keys [host assets-path xmldb topic format params] :as info}]
+  (let [is-browse (= "true" (params "browse"))
+        xsl (slurp (io/resource "xsl/topic.xsl"))
+        query (slurp (io/resource "xsl/topics.xq"))]
+    (xmldb/query
+     query
+     [["$assets-path" assets-path "xs:string"]
+      ["$browse"      is-browse   "xs:boolean"]
+      ["$format"      format      "xs:string"]
+      ["$host"        host        "xs:string"]
+      ["$topic"       topic       "xs:string"]
+      ["$xmldb"       xmldb       "xs:string"]
+      ["$xsl"         xsl         "xs:string"]])))
+
+(defn get-provider
+  "Return a tuple `[provider content-type]` that knows how to return a
+  response given a file format (extension)."
+  [extension]
+  ({"html" [render-topic "text/html"]} extension))
 
 (defn handler
   "Rainbowfish's main HTTP request handler."
   [req]
+  ; Host: support proxying of requests. Typically the request will
+  ; come from the server that host the static content, like nginx or
+  ; shadow-cljs during development.
   (let [host (or (get-in req [:headers "x-forwarded-server"])
                  (:server-name req))]
-    (if-let [{:keys [assets-path xmldb]} (get-in (config/config) [:hosts host])]
-      (let [[topic-name topic-format] (path-to-topic (req/path-info req))
-            info {:host host
-                  :assets-path assets-path
-                  :xmldb xmldb
-                  :topic topic-name
-                  :format topic-format}]
-        (or (ring-file/file-request req assets-path)
-            (->
-             (resp/response (str info))
-             (resp/content-type "text/html"))))
-      (resp/not-found (str "Resource not found: " host req)))))
+
+    (or
+     ; Check if the host is known (must be one of the configured sites).
+     (when-let [{:keys [assets-path xmldb]} (get-in (config/config) [:hosts host])]
+
+       (or
+        ; Check if there's a static file first.
+        (ring-file/file-request req assets-path)
+
+        ; Otherwise check if we can dynamically generate content.
+        (let [[path-name path-format] (path-to-topic (req/path-info req))]
+          (when-let [[provider content-type] (get-provider path-format)]
+            (let [info {:host host
+                        :assets-path assets-path
+                        :xmldb xmldb
+                        :topic path-name
+                        :format path-format
+                        :params (:params req)}]
+              (->
+               (resp/response (provider info))
+               (resp/content-type content-type)))))))
+
+        ; Finally... admit defeat :-).
+     (resp/not-found "Resource not found."))))
 
 (defn app
   "Rainbowfish ring application."
   []
   (-> handler
+      params/wrap-params
       sess/wrap-session))
