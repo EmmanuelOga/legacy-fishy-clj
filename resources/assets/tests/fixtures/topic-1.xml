@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topic xmlns="https://eoga.dev/sdoc" creation-date="2020-04-16">
+
+  <title>Machinations</title>
+
+  <author>Emmanuel Oga</author>
+
+  <description>
+    <p>
+      Website of Emmanuel Oga, a Software Developer based in San
+      Francisco, California.
+    </p>
+  </description>
+
+  <body>
+    <p>
+      Welcome!
+    </p>
+  </body>
+
+  <footer>
+    <p>
+      This site's content is licensed under the
+
+      <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">
+        Creative Commons Attribution 4.0 International License
+      </a>.
+
+      Powered by <ref>Rainbowfish</ref>
+    </p>
+  </footer>
+</topic>

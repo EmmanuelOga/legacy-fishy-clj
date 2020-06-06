@@ -1,6 +1,16 @@
 (ns rainbowfish.file-util
-  (:require [clojure.string :as s])
-  (:import java.nio.file.Paths))
+  (:require [clojure.string :as s]
+            [clojure.java.io :as io])
+  (:import [java.nio.file Path Paths]))
+
+(defn path-to-string
+  "Normalizes the path (removing redundat section) and converts to a
+  path with forward slashes"
+  [^Path path]
+  (-> path
+      (.normalize)
+      (.toString)
+      (.replace "\\" "/")))
 
 (defn relpath
   "Returns a path relative to the given root path."
@@ -8,9 +18,7 @@
   (->
    (Paths/get root (into-array String paths))
    (.toAbsolutePath)
-   (.normalize)
-   (.toString)
-   (.replace "\\" "/")))
+   (path-to-string)))
 
 (defn split-at-last
   "Returns prefix and postfix after splitting but last occurrence of
@@ -29,3 +37,35 @@
      (if (and pre2 post2) parts [(or pre2 post2) nil]))
    (map (fn [s] (if (empty? s) nil s)))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Manifests.
+;; Create a manifest.edn file on a given resources/ folder so we can get the
+;; list of files without having to run nasty reflection tricks.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn get-resources-manifest
+  "NOTE: only works on source folder, not from JAR.
+  Creates a list of the files on the resources folder. This is easier
+  to work with than trying to use Java APIs to list the files on the
+  folder... the idea is to generate this file during development."
+  [path]
+  (let [get-path (comp (fn [s] (.replace s "resources/" ""))
+                       path-to-string
+                       (fn [f] (.toPath f)))
+        is-file (fn [f] (.isFile f))
+        files  (filter is-file (file-seq (io/file path)))]
+    (map get-path files)))
+
+(defn create-resources-manifest
+  "Writes a manifest.edn file on the given resources path (must end in
+  slash). Ex: (create-resources-manifest \"resources/assets/\")"
+  [path]
+  (spit (str path "manifest.edn")
+        (pr-str (get-resources-manifest path))))
+
+(defn read-resources-manifest
+  "Reads a manifest.edn file on the given resources path (must end in
+  slash)"
+  [path]
+  (read-string (slurp (str path "manifest.edn"))))

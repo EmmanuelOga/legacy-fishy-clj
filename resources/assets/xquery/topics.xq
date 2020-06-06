@@ -37,12 +37,6 @@ else
   <body>
     404
     <br/>
-    {"c:/Users/emman/workspace/projects/rainbowfish/sites/eogadev/export/index.topic"}
-    <br/>
     {$assets-path || "/export/" || $topic || ".topic"}
-    <br/>
-    {file:exists($assets-path || "/export/" || $topic || ".topic") }
-    <br/>
-    {file:exists("c:/Users/emman/workspace/projects/rainbowfish/sites/eogadev/export/index.topic")}
   </body>
 </html>

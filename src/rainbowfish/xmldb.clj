@@ -1,7 +1,14 @@
 (ns rainbowfish.xmldb
-  (:require [rainbowfish.config :as config])
+  (:require [clojure.java.io :as io]
+            [rainbowfish.config :as config]
+            [rainbowfish.file-util :as fu]
+            [clojure.string :as s])
   (:import [org.basex BaseXGUI BaseXServer]
            org.basex.api.client.ClientSession))
+
+(def rf-xmldb-name
+  "Name of the XML database used to hold all assets."
+  "rainbowfish")
 
 (def ^:dynamic options
   "BaseX Database Options"
@@ -39,6 +46,11 @@
            (when old-server (.stop old-server))
            (BaseXServer. (into-array [(str "-p" (:port options))])))))
 
+(defn ensure-running
+  "Runs the database if it is not running already."
+  []
+  (if (not @server) (restart)))
+
 (defn launch-gui
   "The GUI doesn't take a context since it can connect to the local
   server with its own context."
@@ -58,9 +70,14 @@
     (callback session)))
 
 (defn fire
-  "Opens a BaseX session and runs a single string command"
-  [& args]
-  (open (fn [sess] (.execute sess (apply str args)))))
+  "Opens a BaseX session and runs every command given"
+  [& commands]
+  (open (fn [sess]
+          (let [exec (fn [cmd] (.execute sess cmd))
+                last (last commands)]
+            (when last
+              (run! exec (butlast commands))
+              (exec last))))))
 
 (defn query
   "Runs a query.
@@ -80,4 +97,18 @@
              (run! (fn [[varname value typename]]
                      (.bind query varname value typename)) bindings)
              (callback query sess))))))
+
+(defn ensure-assets
+  "Uploads to the database the application-wide assets used by
+  Rainbowfish."
+  []
+  (open
+   (fn [sess]
+     (.execute sess (str "CREATE DB " rf-xmldb-name))
+     (let [resources (fu/read-resources-manifest "resources/assets/")]
+       (run!
+        (fn store-resource [path]
+          (let [stream (-> path io/resource io/input-stream)]
+             (.store sess path stream)))
+        resources)))))
 

@@ -1,0 +1,124 @@
+datatypes xs = "http://www.w3.org/2001/XMLSchema-datatypes"
+
+namespace sdoc = "https://eoga.dev/sdoc"
+default namespace = "https://eoga.dev/sdoc"
+
+# Helper to allow any markup in specific areas.
+# For instance, could be used to embed SVG or other formats.
+any-markup = (text | element * - sdoc:* { attribute * { text }*, any-markup* })*
+
+start = sdoc-element-topic
+
+sdoc-element-topic = element topic {
+  attribute creation-date { xs:date } ? &
+
+  attribute publication-date { xs:date } ? &
+
+  # Specifies the way to render the topic. Ex.: "root-page" or "default".
+  attribute theme { xs:string } ? &
+
+  # Pure text title of the Topic. Example uses: table of content
+  # appearences, <title> tag on HTML for standalone topics, etc.
+  element title { text } &
+
+  # Labels are the default label to use when linking to a topic.
+  # If label is missing, the label should default to the title text.
+  element label { text } ? &
+
+  # Could be used to describe the topic by a search engine.
+  # This description allows block content but should be kept succinct.
+  #
+  # When generating HTML, it is used to add a meta-description for
+  # search engines by stripping the markup and using just the text.
+  element description { sdoc-block-element } &
+
+  # Authors full names.
+  element author { text } * &
+
+  # How the elements on each of these areas are displayed is up to the
+  # current theme.
+  element header { sdoc-block-element * } ? &
+  element body { sdoc-block-element * } ? &
+  element footer { sdoc-block-element * } ? &
+
+  # These can be defined to link to other pages. How the elements on
+  # each of these areas are displayed is up to the current theme. For
+  # instance, the standalone theme can use these to piece together a
+  # blog post, the root site can use it to build the main nav.
+  element collection {
+    attribute key { xs:NMTOKEN } &
+    attribute title { text } &
+    attribute glob { text } ? &
+    sdoc-element-collection-ref *
+  } ? &
+
+  # Links to related resources, most likely external sites.  Themes
+  # will most likely use these for "see also" links to (mostly?)
+  # external sites.
+  element link {
+    attribute rel { "cannonical" | "reference" | "alternate" } &
+    attribute href { xs:anyURI } &
+    attribute title { text }
+  } *
+}
+
+# These are similar to inline refs but can have nested refs.
+sdoc-element-collection-ref = element ref {
+  attribute topic { text } ? &
+  attribute label { text } ? &
+  sdoc-element-collection-ref *
+}
+
+sdoc-block-element =
+  sdoc-block-p |
+  sdoc-block-ul
+
+sdoc-inline-element = 
+  sdoc-inline-ref |
+  sdoc-inline-a |
+  sdoc-element-nav
+
+sdoc-block-p = element p {
+  attribute key { text } ?,
+  attribute title { text } ?,
+  (text | sdoc-inline-element) *
+}
+
+sdoc-block-ul = element ul {
+  attribute title { text } ?,
+  sdoc-block-li *
+}
+
+# A collection reference is a placeholder for a SDoc processor to
+# render a list of links to the elements of that collection.
+sdoc-element-nav = element nav {
+  attribute collection { xs:NMTOKEN } ? &
+  attribute include-date { xs:boolean } ? &
+  attribute all-topics { xs:boolean } ?
+}
+
+sdoc-block-li = element li {
+  (text | sdoc-inline-element) *
+}
+
+# Produces a list of all known topics.
+sdoc-block-topics = element topics {
+  empty
+}
+
+# A ref normalizes the text of the label to find a reference to a
+# topic.  For instance: <ref>My Topic</ref> will be a reference to the
+# topic "/topics/my-topic.topic", with label "my topic". When the
+# topic and the label need to be different, the reference key can be
+# provided explicitely. For instance <ref key="spotted-racoon">animal</ref>
+# refers to the topic "/topics/spotted-racoon.topic".
+sdoc-inline-ref = element ref {
+  attribute topic { text } ?,
+  text
+}
+
+sdoc-inline-a = element a {
+  attribute href { text } &
+  attribute rel { text } ? &
+  (text | sdoc-inline-element) *
+}
