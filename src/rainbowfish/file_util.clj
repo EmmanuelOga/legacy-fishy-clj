@@ -46,16 +46,14 @@
   ^Path [^java.io.File file]
   (Paths/get (.toURI file)))
 
-(defn replace
-  "Copy a file or directory to a given destination. Will recursively
-  delete everything at destination and then copy the files from the
-  source to the destionation."
+(defn cp-r
+  "Copy a file or directory to a given destination. If the src is a
+  directory, it copies recursively".
   [& {:keys [src dst]}]
   (let [srcpath (Paths/get src (make-array String 0))
         files (->> (file-seq (io/file src))
                    (filter (fn [f] (.isFile f))))
         paths (map file-to-path files)]
-    (rm-rf dst)
     (run! (fn [p]
             (let [dstrel (.relativize srcpath p)
                   dst (io/file dst dstrel)]

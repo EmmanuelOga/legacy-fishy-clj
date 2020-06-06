@@ -119,3 +119,15 @@
         resources)
        resources))))
 
+(defn recreate-resource-assets
+  "Copies the assets from the BaseX static folder back to
+  resources and recreates the manifests.
+
+  This is useful because we can edit the files directly
+  from BaseX folder and then get them back to resources to make them
+  available for uberjars when we leave development mode."
+  []
+  (fu/rm-rf "resources/assets")
+  (fu/cp-r :src (rainbowfish.xmldb/assets-path) :dst "resources/")
+  (fu/create-resources-manifest "resources/assets/"))
+
