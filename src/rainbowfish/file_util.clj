@@ -37,6 +37,32 @@
      (if (and pre2 post2) parts [(or pre2 post2) nil]))
    (map (fn [s] (if (empty? s) nil s)))))
 
+(defn rm-rf [fname]
+  "Deletes the file (recursively if it is a directory."
+  (run! io/delete-file (-> (io/file fname) file-seq reverse )))
+
+(defn file-to-path
+  "Returns a Path given a file."
+  ^Path [^java.io.File file]
+  (Paths/get (.toURI file)))
+
+(defn replace
+  "Copy a file or directory to a given destination. Will recursively
+  delete everything at destination and then copy the files from the
+  source to the destionation."
+  [& {:keys [src dst]}]
+  (let [srcpath (Paths/get src (make-array String 0))
+        files (->> (file-seq (io/file src))
+                   (filter (fn [f] (.isFile f))))
+        paths (map file-to-path files)]
+    (rm-rf dst)
+    (run! (fn [p]
+            (let [dstrel (.relativize srcpath p)
+                  dst (io/file dst dstrel)]
+              (io/make-parents dst)
+              (io/copy (io/file p) (io/file dst))))
+          paths)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Manifests.
@@ -50,12 +76,12 @@
   to work with than trying to use Java APIs to list the files on the
   folder... the idea is to generate this file during development."
   [path]
-  (let [get-path (comp (fn [s] (.replace s "resources/" ""))
-                       path-to-string
-                       (fn [f] (.toPath f)))
-        is-file (fn [f] (.isFile f))
-        files  (filter is-file (file-seq (io/file path)))]
-    (map get-path files)))
+  (let [trim (fn [s] (.replace s "resources/" ""))
+        files  (->> (file-seq (io/file path))
+                    (filter (fn [f] (.isFile f))))
+        get-path (comp trim path-to-string (fn [f] (.toPath f)))
+        mpath (trim (str path "manifest.edn"))]
+    (filter (fn [p] (not= p mpath)) (map get-path files))))
 
 (defn create-resources-manifest
   "Writes a manifest.edn file on the given resources path (must end in

@@ -11,9 +11,8 @@
                        (map (fn [host]
                               [host {:assets-path (fu/relpath config-path ".." path)
                                      :xmldb xmldb}]) hosts))
-        hosts (->> (map flatten-site sites) ; Produces as many elems as hosts per site
-                   (apply concat) ; Flattens into a single list [[host data] ... ]
-                   (apply concat) ; Flattens
+        hosts (->> (mapcat flatten-site sites)
+                   (apply concat)
                    (apply hash-map))]
     {:basex-path (fu/relpath config-path ".." basex-path)
      :hosts hosts}))

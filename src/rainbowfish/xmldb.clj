@@ -10,19 +10,25 @@
   "Name of the XML database used to hold all assets."
   "rainbowfish")
 
-(def ^:dynamic options
+(defn ^:dynamic options
   "BaseX Database Options"
+  []
   {:root (:basex-path (config/config))
    :host "localhost"
    :port 1984
    :user "admin"
    :password "admin"})
 
+(defn assets-path
+  "Returns the path where basex stores static files"
+  []
+  (fu/relpath (:root (options)) "data" rf-xmldb-name "raw"))
+
 (defonce
   ^{:doc "Instance of the BaseX DB server for the lifetime of the program"}
   server
   (do
-    (System/setProperty "org.basex.path" (:root options))
+    (System/setProperty "org.basex.path" (:root (options)))
     ; Inform JAXP APIs of rainbowfish's XSLT factory before calling
     ; BaseX code.
     (System/setProperty
@@ -44,7 +50,7 @@
   (swap! server
          (fn [old-server]
            (when old-server (.stop old-server))
-           (BaseXServer. (into-array [(str "-p" (:port options))])))))
+           (BaseXServer. (into-array [(str "-p" (:port (options)))])))))
 
 (defn ensure-running
   "Runs the database if it is not running already."
@@ -60,7 +66,7 @@
 (defn create-session
   "Creates a network session to talk to BaseX server"
   []
-  (let [o options]
+  (let [o (options)]
     (ClientSession. (:host o) (:port o) (:user o) (:password o))))
 
 (defn open
@@ -109,6 +115,7 @@
        (run!
         (fn store-resource [path]
           (let [stream (-> path io/resource io/input-stream)]
-             (.store sess path stream)))
-        resources)))))
+            (.store sess path stream)))
+        resources)
+       resources))))
 
