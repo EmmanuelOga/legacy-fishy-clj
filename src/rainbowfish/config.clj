@@ -6,7 +6,7 @@
 (defn expand-config
   "Given the config path and the result of reading the EDN at that file,
   expands a few fields that are derived from the config."
-  [config-path {:keys [basex-path sites] :as config}]
+  [config-path {:keys [basex-path sites backend] :as config}]
   (let [flatten-site (fn [{:keys [path xmldb hosts]}]
                        (map (fn [host]
                               [host {:assets-path (fu/relpath config-path ".." path)
@@ -15,6 +15,7 @@
                    (apply concat)
                    (apply hash-map))]
     {:basex-path (fu/relpath config-path ".." basex-path)
+     :backend backend
      :hosts hosts}))
 
 (defn read-config
@@ -27,6 +28,6 @@
     {}))
 
 (defn ^:dynamic config
-  "Process wide configuration"
+ wide configuration"
   []
   (read-config "sites/rainbowfish.edn"))

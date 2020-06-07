@@ -4,7 +4,7 @@
   box-sizing: border-box;
 }
 
-html, body {
+html, body, #main {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -16,14 +16,12 @@ body {
 }
 
 #main {
-  min-height: 100%;
   display: flex;
   flex-direction: column;
 }
 
 #main > header,
-#main > main,
-#main > footer {
+#main > main {
   padding: .5rem;
 }
       
@@ -31,24 +29,55 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+
   background-color: greenyellow;
-  border-bottom: 1px solid rgba(0, 0, 0, .25);
+  border-bottom: 1px solid rgba(0, 0, 0, .125);
 }
 
 #main > main {
   flex: 1;
+  height: 0; /* Setting height limits the growth of the container. */
+
   display: flex;
   flex-direction: row;
-  outline: 1px solid red;
 }
 
-.topic {
-  padding: 1rem;
-  flex: 0 0 60rem;
+.topic-module {
   margin: 1rem;
-  box-shadow: .25rem .25rem 1rem 0 rgba(0, 0, 0, .25);
+  box-shadow: .25rem .25rem 1rem 0 rgba(0, 0, 0, .125);
+  flex: 0 0 0;
+  min-width: 50rem;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
 }
 
-.topic.selected {
-  outline: 2px solid green;
+.topic-module.selected {
+  outline: 1px solid green;
+}
+
+.topic-toolbar {
+  margin: .25rem;
+  padding: .25rem;
+
+  display: flex;
+  justify-content: flex-end;
+
+  background-color: greenyellow;
+  border-bottom: 1px solid rgba(0, 0, 0, .125);
+}
+
+.topic-toolbar > button {
+  margin: .125rem;
+}
+
+.topic-content {
+  margin: .25rem;
+  padding: .5rem;
+
+  flex: 1;
+
+  border-bottom: 1px solid rgba(0, 0, 0, .125);
+  overflow-y: auto;
 }

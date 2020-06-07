@@ -17,4 +17,5 @@
         {:main
          {:entries [rainbowfish.client]
           :init-fn rainbowfish.client/init
-          :devtools {:after-load rainbowfish.client/reload}}}}}}
+          :devtools {:preloads [shadow.remote.runtime.cljs.browser]
+                     :after-load rainbowfish.client/reload}}}}}}

@@ -1,5 +1,5 @@
-{:basex-path
- "./basex"
+{:basex-path "./basex"
+ :backend {:port 9876}
  :sites
  [{:path "eogadev"
    :xmldb "devoga"

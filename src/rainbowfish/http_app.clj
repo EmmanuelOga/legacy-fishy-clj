@@ -20,15 +20,15 @@
   "Converts a request path to a topic"
   [path]
   (let [[name ext] (fu/get-base-and-ext path)]
-    (if-not ext [name "html"] [name ext])))
+    [(if name name "index") (if ext ext "html")]))
 
 (defn render-topic
   "Renders a topic given a path.
   Dispatches to BaseX, which should find and render the topic."
   [{:keys [host assets-path xmldb topic format params] :as info}]
   (let [is-browse (= "true" (params "browse"))
-        xsl (slurp (io/resource "xsl/topic.xsl"))
-        query (slurp (io/resource "xsl/topics.xq"))]
+        xsl (slurp (io/resource "assets/xsl/topic.xsl"))
+        query (slurp (io/resource "assets/xquery/topics.xq"))]
     (xmldb/query
      query
      [["$assets-path" assets-path "xs:string"]
@@ -60,7 +60,7 @@
 
        (or
         ; Check if there's a static file first.
-        (ring-file/file-request req assets-path)
+        (ring-file/file-request req (str assets-path "/static"))
 
         ; Otherwise check if we can dynamically generate content.
         (let [[path-name path-format] (path-to-topic (req/path-info req))]

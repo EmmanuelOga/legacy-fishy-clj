@@ -48,7 +48,7 @@
 
 (defn cp-r
   "Copy a file or directory to a given destination. If the src is a
-  directory, it copies recursively".
+  directory, it copies recursively."
   [& {:keys [src dst]}]
   (let [srcpath (Paths/get src (make-array String 0))
         files (->> (file-seq (io/file src))
