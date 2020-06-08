@@ -138,10 +138,10 @@ label {
   flex: 1;
 }
 
-input.open-topic {
+input.topic-q {
   min-width: 15rem;
 }
 
-input.open-topic:invalid {
+input.topic-q:invalid {
   background-color: rgba(255, 212, 212);
 }

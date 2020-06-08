@@ -9,12 +9,12 @@
   <template id='topic-template'>
     <div class='topic-module'>
       <div class='topic-toolbar'>
-        <div class='name'>/the/topic</div>
-        <button class='preview'>Save</button>
+        <div class='name'></div>
+        <button class='save'>Save</button>
         <button class='close'>Close</button>
       </div>
       <div class='topic-content'>
-        <div class='status'>Ready</div>
+        <div class='status'></div>
         <div class='meta'>
           <details>
             <summary>Meta</summary>
@@ -38,9 +38,10 @@
       <div class='logo'><strong>Rainbowfish</strong> 🐠</div>
 
       <div>
-        <label for='open-topic'>URL</label>
-        <input class='open-topic' type='text' name='open-topic' pattern="(/[A-Za-z\/-]+)?" />
-        <button>Open</button>
+        <label for='topic-q'>URL</label>
+        <input class='topic-q' type='text' name='topic-q'
+               pattern="(/[A-Za-z\/-]+)?" />
+        <button class='open-q'>Open</button>
       </div>
 
       <div>

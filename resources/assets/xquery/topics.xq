@@ -1,6 +1,7 @@
 xquery version "3.1";
 
 declare namespace sd = 'http://eoga.dev/sdoc';
+declare namespace output = "http://www.w3.org/2010/xslt-xquery-serialization";
 
 declare variable $assets-path as xs:string external;
 declare variable $browse as xs:boolean external;
@@ -11,9 +12,12 @@ declare variable $xmldb as xs:string external;
 declare variable $xsl-topic as xs:string external;
 declare variable $default-triples as xs:string external;
 
-(: Outputs the result as html. :)
+(:
 declare option output:method 'html';
 declare option output:html-version '5.0';
+:)
+declare option output:omit-xml-declaration "no";
+declare option output:method "xml";
 
 (: Turn whitespace chopping off. :)
 declare option db:chop 'no';
@@ -43,11 +47,5 @@ let $html := if ($in)
                </html>
 
 return if ($browse) then
-<response>
-  {$in}
-  <meta>
-  {$default-triples}
-  </meta>
-  {$html}
-</response>
+<response>{$in}<meta>{$default-triples}</meta>{$html}</response>
 else $html
