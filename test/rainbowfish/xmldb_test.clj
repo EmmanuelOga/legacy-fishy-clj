@@ -1,12 +1,13 @@
 (ns rainbowfish.xmldb-test
-  (:require [rainbowfish.xmldb :as xmldb]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [clojure.test :refer :all]
-            [clojure.string :as str]))
+            [rainbowfish.file-util :as fu]
+            [rainbowfish.xmldb :as xmldb]))
 
 (defn setup-database
-  [t]
-  (xmldb/ensure-running)
-  (xmldb/ensure-assets))
+  []
+  (xmldb/ensure-running))
 
 (use-fixtures :once setup-database)
 
@@ -21,11 +22,10 @@
   (nil? (str/index-of xml-str "invalid")))
 
 (deftest it-passes-validation-on-fixtures
-  (let [result (xmldb/fire
-                "OPEN rainbowfish"
-                (str "RUN " (xmldb/assets-path) "/assets/tests/validate-fixtures.xq"))]
-    (is (without-errors result))))
-
-
+  (is (without-errors
+       (xmldb/query
+        (slurp (io/resource "assets/tests/validate-fixtures.xq"))
+        [["$schema" (slurp (io/resource "assets/schemas/sdoc.rnc"))]
+         ["$fixtures-path" (fu/relpath "." "resources/assets/tests/fixtures")]]))))
 
 

@@ -28,6 +28,5 @@
     {}))
 
 (defn ^:dynamic config
- wide configuration"
   []
   (read-config "sites/rainbowfish.edn"))

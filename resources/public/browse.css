@@ -85,8 +85,13 @@ body {
   border-bottom: 1px solid rgba(0, 0, 0, .125);
 }
 
-.topic-toolbar > button {
+.topic-toolbar > * {
   margin: .125rem;
+}
+
+.topic-toolbar .name {
+    font-weight: bold;
+    flex: 1;
 }
 
 .topic-content {
@@ -106,10 +111,29 @@ body {
   border-right: .25rem solid white;
   border-bottom: .25rem solid white;
 
-  min-height: 10rem;
-  min-width: 20rem;
-
   background-color: #fafafa;
 
   overflow: auto;
+}
+
+.topic-content textarea {
+  width: 100%;
+  height: 100%;
+  margin-top: .5rem;
+}
+
+.topic-content .meta textarea {
+  min-height: 15rem;
+}
+
+.topic-content .topic textarea {
+  min-height: 30rem;
+}
+
+.topic-content .preview {
+  flex: 1;
+}
+
+.search input {
+  min-width: 20rem;
 }

@@ -31,13 +31,13 @@
         query (slurp (io/resource "assets/xquery/topics.xq"))]
     (xmldb/query
      query
-     [["$assets-path" assets-path "xs:string"]
-      ["$browse"      is-browse   "xs:boolean"]
-      ["$format"      format      "xs:string"]
-      ["$host"        host        "xs:string"]
-      ["$topic"       topic       "xs:string"]
-      ["$xmldb"       xmldb       "xs:string"]
-      ["$xsl"         xsl         "xs:string"]])))
+     [["$assets-path" assets-path]
+      ["$browse"      is-browse "xs:boolean"]
+      ["$format"      format]
+      ["$host"        host  ]
+      ["$topic"       topic ]
+      ["$xmldb"       xmldb ]
+      ["$xsl"         xsl   ]])))
 
 (defn get-provider
   "Return a tuple `[provider content-type]` that knows how to return a

@@ -9,21 +9,25 @@
   <template id='topic-template'>
     <div class='topic-module'>
       <div class='topic-toolbar'>
-        <button class='layout'>Layout</button>
-        |
-        <button class='topic'>Topic</button>
-        <button class='meta'>Meta</button>
-        <button class='preview'>Preview</button>
+        <div class='name'>/the/topic</div>
+        <button class='preview'>Save</button>
         <button class='close'>Close</button>
       </div>
       <div class='topic-content'>
-        <div class='topic'>Topic</div>
-        <div class='meta'>Meta</div>
-        <div class='preview'>Preview</div>
-        <div class='layout'>Layout</div>
-        <div class='close'>Close
-abc abc abc abc asdklhj asdlkjh asdkjh asdlkj  
- asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj asdasd askdhj asklhjaslk hjadskhj
+        <div class='status'>Ready</div>
+        <div class='meta'>
+          <details>
+            <summary>Meta</summary>
+            <textarea></textarea>
+          </details>
+        </div>
+        <div class='topic'>
+          <details open="open">
+            <summary>Source</summary>
+            <textarea></textarea>
+          </details>
+        </div>
+        <div class='preview'>
         </div>
       </div>
     </div>
@@ -36,13 +40,11 @@ abc abc abc abc asdklhj asdlkjh asdkjh asdlkj
       <div class='search'>
         <label for='quick-search' title='Search'>
         <input type='text' name='query' />
-        <button>Go</button>
+        <button>Open</button>
       </div>
 
       <div class='controls'>
-        <button>1</button>
-        <button>2</button>
-        <button>3</button>
+        <button>All Topics</button>
       </div>
     </header>
 

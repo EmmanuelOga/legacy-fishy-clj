@@ -101,33 +101,9 @@
            (with-open [query (.query sess xq)]
              ; Bind any parameters.
              (run! (fn [[varname value typename]]
-                     (.bind query varname value typename)) bindings)
+                     (.bind query
+                            varname
+                            value
+                            (or typename "xs:string"))) bindings)
              (callback query sess))))))
-
-(defn ensure-assets
-  "Uploads to the database the application-wide assets used by
-  Rainbowfish."
-  []
-  (open
-   (fn [sess]
-     (.execute sess (str "CREATE DB " rf-xmldb-name))
-     (let [resources (fu/read-resources-manifest "resources/assets/")]
-       (run!
-        (fn store-resource [path]
-          (let [stream (-> path io/resource io/input-stream)]
-            (.store sess path stream)))
-        resources)
-       resources))))
-
-(defn recreate-resource-assets
-  "Copies the assets from the BaseX static folder back to
-  resources and recreates the manifests.
-
-  This is useful because we can edit the files directly
-  from BaseX folder and then get them back to resources to make them
-  available for uberjars when we leave development mode."
-  []
-  (fu/rm-rf "resources/assets")
-  (fu/cp-r :src (rainbowfish.xmldb/assets-path) :dst "resources/")
-  (fu/create-resources-manifest "resources/assets/"))
 
