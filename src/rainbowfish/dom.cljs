@@ -1,5 +1,29 @@
 (ns rainbowfish.dom)
 
+(defn get-ancestor
+  [node selector]
+  (loop [elem node]
+    (when elem
+      (if (.matches elem selector)
+        elem
+        (recur (.-parentElement elem))))))
+
+(defn on
+  [elem event-name handler & [storage]]
+  (when elem
+    (.addEventListener elem event-name handler)
+    (let [uninst (fn [] (.removeEventListener elem event-name handler))]
+      (when storage (swap! storage conj uninst))
+      uninst)))
+
+(defn cancel-on
+  [storage]
+  (swap!
+   storage
+   (fn [old-handlers]
+     (run! (fn [uninst] (uninst)) old-handlers)
+     [])))
+
 (defn matches
   [target selector]
   (and target (.matches target selector) target))
@@ -33,14 +57,14 @@
 
 (defn attr
   ([elem key]
-    (.getAttribute elem key))
+   (.getAttribute elem key))
   ([elem key val]
-    (.setAttribute elem key (clj->js val))
-    (.getAttribute elem key)))
+   (.setAttribute elem key (clj->js val))
+   (.getAttribute elem key)))
 
 (defn data
   ([elem key]
-    (attr elem (str "data-" key)))
+   (attr elem (str "data-" key)))
   ([elem key val]
    (attr elem (str "data-" key) val)))
 

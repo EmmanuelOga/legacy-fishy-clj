@@ -34,16 +34,16 @@
   </template>
   
   <div id='main'>
-    <header>
+    <header class='browse-toolbar'>
       <div class='logo'><strong>Rainbowfish</strong> 🐠</div>
 
-      <div class='search'>
-        <label for='quick-search' title='Search'>
-        <input type='text' name='query' />
+      <div>
+        <label for='open-topic'>URL</label>
+        <input class='open-topic' type='text' name='open-topic' pattern="(/[A-Za-z\/-]+)?" />
         <button>Open</button>
       </div>
 
-      <div class='controls'>
+      <div>
         <button>All Topics</button>
       </div>
     </header>

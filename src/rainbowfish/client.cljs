@@ -8,15 +8,24 @@
         c (dom/query "#main>main")]
     (.appendChild c clone)))
 
+(defonce handlers (atom []))
+
 (defn init
   []
-  (.log js/console "Ready.")
-  (open-topic "/"))
+  (dom/on (dom/query ".open-topic")
+          "keyup"
+          (fn [ev]
+            (let [target (.-target ev)]
+              (when (and (= (.-key ev) "Enter")
+                         (.checkValidity target))
+                (open-topic (.-value target)))))
+          handlers))
 
-(defn ^:dev/after-load start []
-  (js/console.log "Start")
-  (open-topic "/"))
-  
+(defn ^:dev/before-load stop
+  []
+  (dom/cancel-on handlers))
 
-(defn ^:dev/before-load stop []
-  (js/console.log "Stop"))
+(defn ^:dev/after-load start
+  []
+  (init))
+

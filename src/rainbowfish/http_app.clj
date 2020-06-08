@@ -1,14 +1,13 @@
 (ns rainbowfish.http-app
-  (:require [clojure.string :as str]
+  (:require [clojure.java.io :as io]
             [rainbowfish.config :as config]
             [rainbowfish.file-util :as fu]
             [rainbowfish.xmldb :as xmldb]
             [ring.middleware.file :as ring-file]
-            [ring.middleware.session :as sess]
             [ring.middleware.params :as params]
+            [ring.middleware.session :as sess]
             [ring.util.request :as req]
-            [ring.util.response :as resp]
-            [clojure.java.io :as io]))
+            [ring.util.response :as resp]))
 
 (defn session-test [{session :session}]
   (let [n (session :n 1)]
@@ -17,33 +16,47 @@
         (assoc-in [:session :n] (inc n)))))
 
 (defn path-to-topic
-  "Converts a request path to a topic"
+  "Converts a request path to a topic."
   [path]
   (let [[name ext] (fu/get-base-and-ext path)]
-    [(if name name "index") (if ext ext "html")]))
+    [(if name path (str path "index")) (if ext ext "html")]))
 
 (defn render-topic
   "Renders a topic given a path.
   Dispatches to BaseX, which should find and render the topic."
   [{:keys [host assets-path xmldb topic format params] :as info}]
-  (let [is-browse (= "true" (params "browse"))
-        xsl (slurp (io/resource "assets/xsl/topic.xsl"))
-        query (slurp (io/resource "assets/xquery/topics.xq"))]
-    (xmldb/query
-     query
-     [["$assets-path" assets-path]
-      ["$browse"      is-browse "xs:boolean"]
-      ["$format"      format]
-      ["$host"        host  ]
-      ["$topic"       topic ]
-      ["$xmldb"       xmldb ]
-      ["$xsl"         xsl   ]])))
+  (xmldb/query
+   (slurp (io/resource "assets/xquery/topics.xq"))
+   [["$assets-path" assets-path]
+    ["$browse" (= "true" (params "browse")) "xs:boolean"]
+    ["$format" format]
+    ["$host" host]
+    ["$topic" topic]
+    ["$xmldb" xmldb]
+    ["$default-triples" (slurp (io/resource "assets/triples/default.ttl"))]
+    ["$xsl-topic" (slurp (io/resource "assets/xsl/topic.xsl"))]]))
 
 (defn get-provider
   "Return a tuple `[provider content-type]` that knows how to return a
   response given a file format (extension)."
   [extension]
   ({"html" [render-topic "text/html"]} extension))
+
+(defn handle-inner
+  "Inner method of the HTTP handler. At this point we know the host
+  requested exists, and we have the XMLDB name."
+  [req host assets-path xmldb]
+  (let [[path-name path-format] (path-to-topic (req/path-info req))]
+    (when-let [[provider content-type] (get-provider path-format)]
+      (let [info {:host host
+                  :assets-path assets-path
+                  :xmldb xmldb
+                  :topic path-name
+                  :format path-format
+                  :params (:params req)}]
+        (->
+         (resp/response (provider info))
+         (resp/content-type content-type))))))
 
 (defn handler
   "Rainbowfish's main HTTP request handler."
@@ -63,17 +76,7 @@
         (ring-file/file-request req (str assets-path "/static"))
 
         ; Otherwise check if we can dynamically generate content.
-        (let [[path-name path-format] (path-to-topic (req/path-info req))]
-          (when-let [[provider content-type] (get-provider path-format)]
-            (let [info {:host host
-                        :assets-path assets-path
-                        :xmldb xmldb
-                        :topic path-name
-                        :format path-format
-                        :params (:params req)}]
-              (->
-               (resp/response (provider info))
-               (resp/content-type content-type)))))))
+        (handle-inner req host assets-path xmldb)))
 
         ; Finally... admit defeat :-).
      (resp/not-found "Resource not found."))))

@@ -14,18 +14,27 @@
   <xsl:mode on-no-match="shallow-copy"/><!-- Identity transform! -->
 
   <xsl:template match="sd:topic">
-    <html>
-      <header class="clear">
-        <xsl:apply-templates select="sd:header/*" />
-      </header>
+    <html lang="en">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/css/index.css" />
+        <script type='application/ld+json'> 
+        </script>
+      </head>
 
-      <main class="clear">
-        <xsl:apply-templates select="(sd:body, sd:description)[1]/*" />
-      </main>
+      <body>
+        <header class="clear">
+          <xsl:apply-templates select="sd:header/*" />
+        </header>
 
-      <footer class="clear">
-        <xsl:apply-templates select="//sd:footer/*" />
-      </footer>
+        <main class="clear">
+          <xsl:apply-templates select="(sd:body, sd:description)[1]/*" />
+        </main>
+
+        <footer class="clear">
+          <xsl:apply-templates select="//sd:footer/*" />
+        </footer>
+      </body>
     </html>
   </xsl:template>
 
