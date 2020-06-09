@@ -18,8 +18,8 @@
 (defn path-to-topic
   "Converts a request path to a topic."
   [path]
-  (let [[name ext] (fu/get-base-and-ext path)]
-    [(if name path (str path "index")) (if ext ext "html")]))
+  (let [[base name ext] (fu/get-base-name-and-ext path)]
+    [(str (or base "/") (or name "index")) (or ext "html")]))
 
 (defn render-topic
   "Renders a topic given a path.
@@ -40,7 +40,8 @@
   "Return a tuple `[provider content-type]` that knows how to return a
   response given a file format (extension)."
   [extension]
-  ({"html" [render-topic "text/html"]} extension))
+  ({"html" [render-topic "text/html"]
+    "topic" [render-topic "application/xml"]} extension))
 
 (defn handle-inner
   "Inner method of the HTTP handler. At this point we know the host

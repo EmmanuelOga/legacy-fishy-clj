@@ -36,13 +36,19 @@ declare function sd:read-topic($topic as xs:string) {
 
 let $in := sd:read-topic($topic)
 let $html := if ($in)
-             then xslt:transform($in, fn:parse-xml($xsl-topic)) update {
-               insert node <p>{$topic}</p> into .
-             }
+             then
+               xslt:transform($in, fn:parse-xml($xsl-topic))
              else
                <html>
                  <body>
                    404
+
+                   <assets-path>{$assets-path}</assets-path>
+                   <browse>{$browse}</browse>
+                   <format>{$format}</format>
+                   <host>{$host}</host>
+                   <topic>{$topic}</topic>
+                   <xmldb>{$xmldb}</xmldb>
                  </body>
                </html>
 

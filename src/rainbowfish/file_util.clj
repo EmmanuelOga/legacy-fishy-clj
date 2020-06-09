@@ -28,13 +28,16 @@
     [(subs str 0 idx) (subs str (+ 1 idx))]
     [str nil]))
 
-(defn get-base-and-ext
-  "Gets the basename of the file and its extension."
+(defn get-base-name-and-ext
+  "Gets the base path, the name and the extension of the file under
+  given path."
   [path]
   (->>
    (let [[pre1 post1] (split-at-last path "/")
-         [pre2 post2 :as parts] (split-at-last (or post1 pre1) ".")]
-     (if (and pre2 post2) parts [(or pre2 post2) nil]))
+         [pre2 post2] (split-at-last (or post1 pre1) ".")]
+     (if (and pre2 post2)
+       [pre1 pre2 post2]
+       [pre1 (or pre2 post2) nil]))
    (map (fn [s] (if (empty? s) nil s)))))
 
 (defn rm-rf [fname]

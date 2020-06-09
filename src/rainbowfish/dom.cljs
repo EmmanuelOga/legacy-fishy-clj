@@ -76,8 +76,12 @@
   [elem val]
   (.remove (.-classList elem) val))
 
+(defn create-fragment
+  []
+  (js/document.createDocumentFragment))
+
 (defn elem
-  [elem-name params]
+  [elem-name & params]
   (let [elem (.createElement js/document (name elem-name))
         setter (fn [[key val]]
                  (if (= key :class)
@@ -100,12 +104,20 @@
     (run! set-param (seq params))
     url))
 
+(defn parse-xml
+  [text]
+  (-> (js/window.DOMParser.) (.parseFromString text "text/xml")))
+
+(defn serialize-xml
+  [fragment]
+  (.serializeToString (js/XMLSerializer.) fragment))
+
 (defn get-xml
   [url callback]
   (-> (js/fetch (js/Request. url))
-      (.then (fn [res] (.text res)))
-      (.then (fn [text]
-               (->
-                (js/window.DOMParser.)
-                (.parseFromString text "text/xml")
-                callback)))))
+      (.then (fn [res]
+               (let [status (.-status res)]
+                 (if (and (>= status 200) (< status 300))
+                    (-> (.text res)
+                        (.then (fn [text] (callback (parse-xml text)))))
+                    (callback nil)))))))

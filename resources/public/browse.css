@@ -136,6 +136,8 @@ label {
 
 .topic-content .preview {
   flex: 1;
+  box-shadow: inset 0 0 .25rem rgba(0, 0, 0, .125);
+  border-radius: .25rem;
 }
 
 input.topic-q {
