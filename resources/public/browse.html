@@ -6,34 +6,6 @@
   <link rel='stylesheet' href='/browse.css'/>
 </head>
 <body>
-  <template id='topic-template'>
-    <div class='topic-module'>
-      <div class='topic-toolbar'>
-        <div class='name'></div>
-        <button class='topic-module-save'>Save</button>
-        <button class='topic-module-delete'>Delete</button>
-        <button class='topic-module-close'>Close</button>
-      </div>
-      <div class='topic-content'>
-        <div class='status'></div>
-        <div class='meta'>
-          <details>
-            <summary>Meta</summary>
-            <textarea></textarea>
-          </details>
-        </div>
-        <div class='topic'>
-          <details open="open">
-            <summary>Source</summary>
-            <textarea></textarea>
-          </details>
-        </div>
-        <div class='preview'>
-        </div>
-      </div>
-    </div>
-  </template>
-  
   <div id='main'>
     <header class='browse-toolbar'>
       <div class='logo'><strong>Rainbowfish</strong> 🐠</div>
@@ -50,7 +22,7 @@
       </div>
     </header>
 
-    <main>
+    <main id='topics-container'>
     </main>
   </div>
     
