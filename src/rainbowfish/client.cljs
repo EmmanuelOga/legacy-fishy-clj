@@ -48,7 +48,7 @@
              topic (dom/get-ancestor target ".topic-module")]
          (when topic
            (cond
-             (.matches target ".topic-module-delete") (.remove topic)
+             (.matches target ".topic-module-close") (.remove topic)
              (.matches target ".topic-module-save") (save-topic topic))))))
 
     (let [q (dom/query ".topic-q")

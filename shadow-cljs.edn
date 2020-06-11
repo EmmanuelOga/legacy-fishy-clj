@@ -3,7 +3,8 @@
  ["src"]
 
  :dependencies
- []
+ [[binaryage/devtools "1.0.2"]
+  [reagent "0.10.0"]]
 
  :dev-http
  {8000 {:roots ["shadow/" "resources/public/"]
