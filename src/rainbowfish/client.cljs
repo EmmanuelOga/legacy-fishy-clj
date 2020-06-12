@@ -4,9 +4,11 @@
             [reagent.dom :as rd]
             [shadow.remote.runtime.cljs.browser]))
 
-(defn simple-component
-  []
-  [:div.topic-module
+(defonce topic-data (rc/atom []))
+
+(defn topic-module
+  [data]
+  ^{:key data}[:div.topic-module
    [:div.topic-toolbar
     [:div.name]
     [:button.topic-module-save "Save"]
@@ -27,14 +29,18 @@
       [:summary "Preview"]
       [:div.content "Loading..."]]]]])
 
-(defn render-simple []
+(defn topic-modules
+  []
+  [:<> (map topic-module @topic-data)])
+
+(defn render-all []
   (rd/render
-   [simple-component]
+   [topic-modules]
    (dom/query "#topics-container")))
 
 (defn init
   []
-  (render-simple))
+  (render-all))
 
 (defn ^:dev/before-load stop
   [])
