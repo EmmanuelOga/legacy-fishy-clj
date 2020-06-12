@@ -1,6 +1,7 @@
 (ns rainbowfish.client
   (:require [rainbowfish.dom :as dom]
-            [reagent.core :as r]
+            [reagent.core :as rc]
+            [reagent.dom :as rd]
             [shadow.remote.runtime.cljs.browser]))
 
 (defn simple-component
@@ -18,13 +19,16 @@
       [:summary "Meta"]
       [:textarea]]]
     [:div.topic
-     [:details {"open" "open"}
+     [:details
       [:summary "Source"]
       [:textarea]]]
-    [:div.preview]]])
+    [:div.preview
+     [:details {:open true}
+      [:summary "Preview"]
+      [:div.content "Loading..."]]]]])
 
 (defn render-simple []
-  (r/render
+  (rd/render
    [simple-component]
    (dom/query "#topics-container")))
 

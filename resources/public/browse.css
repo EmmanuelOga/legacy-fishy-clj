@@ -136,8 +136,31 @@ label {
 
 .topic-content .preview {
   flex: 1;
-  box-shadow: inset 0 0 .25rem rgba(0, 0, 0, .125);
   border-radius: .25rem;
+  height: 100%;
+}
+
+.topic-content .preview details {
+    height: 100%;
+    width: 100%;
+
+    position: relative;
+}
+
+.topic-content .preview details div.content {
+    position: absolute;
+
+    margin: .25rem;
+    padding: .25rem;
+    
+    top: 2rem;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    background-color: white;
+    outline: 1px solid rgba(0, 0, 0, .125);
+    outline-offset: 2px;
 }
 
 input.topic-q {
