@@ -2,41 +2,90 @@
   (:require [rainbowfish.dom :as dom]
             [reagent.core :as rc]
             [reagent.dom :as rd]
-            [shadow.remote.runtime.cljs.browser]))
+            [clojure.string :as str]))
 
-(defonce topic-data (rc/atom []))
+(defonce next-id (atom 0))
+
+(defn new-id []
+  (swap! next-id inc))
+
+(defonce topic-data (rc/atom (sorted-map)))
+
+(defn add-topic-module
+  [data]
+  (let [key (new-id)]
+    (swap! topic-data assoc key (assoc data :key key))))
+
+(defn remove-topic-module
+  [key]
+  (swap! topic-data dissoc key))
 
 (defn topic-module
-  [data]
-  ^{:key data}[:div.topic-module
-   [:div.topic-toolbar
-    [:div.name]
-    [:button.topic-module-save "Save"]
-    [:button.topic-module-delete "Delete"]
-    [:button.topic-module-close "Close"]]
-   [:div.topic-content
+  [{:keys [path topic meta html key]}]
+  ^{:key key}
+  [:div.topic-module
+   [:div.toolbar
+    [:div.name path]
+    [:button.save "Save"]
+    [:button.delete "Delete"]
+    [:button.close {:on-click (fn [ev] (remove-topic-module key))} "Close"]]
+   [:div.content
     [:div.status]
     [:div.meta
      [:details
       [:summary "Meta"]
-      [:textarea]]]
+      [:textarea {:value meta}]]]
     [:div.topic
      [:details
       [:summary "Source"]
-      [:textarea]]]
+      [:textarea {:value topic}]]]
     [:div.preview
      [:details {:open true}
       [:summary "Preview"]
-      [:div.content "Loading..."]]]]])
+      [:div.content
+       {:dangerouslySetInnerHTML {:__html html}}]]]]])
+
+(defn toolbar-query
+  []
+  (let [input
+        (rc/atom nil)
+
+        get-valid-query
+        (fn []
+          (let [val (.-value @input)]
+            (if (and (.checkValidity @input) (not (empty? val)))
+              (if (str/starts-with? val "/") val (str "/" val)))))
+
+        handle-topic-xml
+        (fn [path xml]
+          (add-topic-module
+           {:path path
+            :topic (.-outerHTML (dom/query xml "topic"))
+            :meta (.-textContent (dom/query xml "meta"))
+            :html (.-innerHTML (dom/query xml "html"))}))
+
+        open-topic
+        (fn []
+          (when-let [query (get-valid-query)]
+            (dom/get-xml
+             (dom/url query :browse true)
+             (fn [xml] (handle-topic-xml query xml)))))]
+    [:<>
+     [:label {:for "topic-q"} "URL"]
+     [:input {:id "topic-q"
+              :type "text"
+              :ref #(reset! input %)
+              :pattern "[A-Za-z0-9\\/-]*"
+              :on-key-down #(when (= (.-which %) 13) (open-topic))}]
+     [:button.open-q {:on-click #(open-topic)} "Open"]]))
 
 (defn topic-modules
   []
-  [:<> (map topic-module @topic-data)])
+  [:<> (map topic-module (vals @topic-data))])
 
 (defn render-all []
-  (rd/render
-   [topic-modules]
-   (dom/query "#topics-container")))
+  (rd/render [topic-modules] (dom/query "#topics-container"))
+  (rd/render toolbar-query (dom/query "#toolbar-query")))
 
 (defn init
   []
