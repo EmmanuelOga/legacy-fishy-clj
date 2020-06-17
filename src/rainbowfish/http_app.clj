@@ -1,5 +1,7 @@
 (ns rainbowfish.http-app
   (:require [clojure.java.io :as io]
+            [reitit.core :as r]
+            [rainbowfish.routes :as routes]
             [rainbowfish.config :as config]
             [rainbowfish.file-util :as fu]
             [rainbowfish.xmldb :as xmldb]
@@ -34,6 +36,7 @@
     ["$topic" topic]
     ["$xmldb" xmldb]
     ["$default-triples" (slurp (io/resource "assets/triples/default.ttl"))]
+    ["$default-topic" (slurp (io/resource "assets/xml/default.topic"))]
     ["$xsl-topic" (slurp (io/resource "assets/xsl/topic.xsl"))]]))
 
 (defn get-provider
@@ -43,7 +46,7 @@
   ({"html" [render-topic "text/html"]
     "topic" [render-topic "application/xml"]} extension))
 
-(defn handle-inner
+(defn handle-public
   "Inner method of the HTTP handler. At this point we know the host
   requested exists, and we have the XMLDB name."
   [req host assets-path xmldb]
@@ -73,11 +76,15 @@
      (when-let [{:keys [assets-path xmldb]} (get-in (config/config) [:hosts host])]
 
        (or
+        ; Check if we are handling an API call.
+        (when-let [match (r/match-by-path routes/API (req/path-info req))]
+          ((:result match) req match))
+
         ; Check if there's a static file first.
         (ring-file/file-request req (str assets-path "/static"))
 
         ; Otherwise check if we can dynamically generate content.
-        (handle-inner req host assets-path xmldb)))
+        (handle-public req host assets-path xmldb)))
 
         ; Finally... admit defeat :-).
      (resp/not-found "Resource not found."))))

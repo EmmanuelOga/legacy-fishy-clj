@@ -4,6 +4,7 @@
 
  :dependencies
  [[binaryage/devtools "1.0.2"]
+  [metosin/reitit "0.5.2"]
   [reagent "0.10.0"]]
 
  :dev-http

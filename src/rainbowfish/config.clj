@@ -3,6 +3,10 @@
             [clojure.edn :as edn]
             [rainbowfish.file-util :as fu]))
 
+(def cli-params
+  "Configuration that is expected to come from the CLI/Startup"
+  (atom {:development-mode true}))
+
 (defn expand-config
   "Given the config path and the result of reading the EDN at that file,
   expands a few fields that are derived from the config."
@@ -14,9 +18,11 @@
         hosts (->> (mapcat flatten-site sites)
                    (apply concat)
                    (apply hash-map))]
-    {:basex-path (fu/relpath config-path ".." basex-path)
-     :backend backend
-     :hosts hosts}))
+    (conj
+     @cli-params
+     {:basex-path (fu/relpath config-path ".." basex-path)
+      :backend backend
+      :hosts hosts})))
 
 (defn read-config
   "Attempts to create configuration by openining the .edn at the given path."

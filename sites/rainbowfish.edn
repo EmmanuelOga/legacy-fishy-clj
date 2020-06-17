@@ -1,6 +1,5 @@
 {:basex-path "./basex"
  :backend {:port 9876}
- :api-prefix "_RF_"
  :sites
  [{:path "eogadev"
    :xmldb "devoga"

@@ -69,7 +69,10 @@
           (when-let [query (get-valid-query)]
             (dom/get-xml
              (dom/url query :browse true)
-             (fn [xml] (handle-topic-xml query xml)))))]
+             (fn [xml]
+               (if xml
+                (handle-topic-xml query xml)
+                (js/alert "Error connection to API"))))))]
     [:<>
      [:label {:for "topic-q"} "URL"]
      [:input {:id "topic-q"

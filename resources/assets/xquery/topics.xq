@@ -10,6 +10,8 @@ declare variable $host as xs:string external;
 declare variable $topic as xs:string external;
 declare variable $xmldb as xs:string external;
 declare variable $xsl-topic as xs:string external;
+
+declare variable $default-topic as xs:string external;
 declare variable $default-triples as xs:string external;
 
 (:
@@ -22,36 +24,62 @@ declare option output:method "xml";
 (: Turn whitespace chopping off. :)
 declare option db:chop 'no';
 
-(: Return a topic by name, by first looking it up on the current
-database, then on the export folder. Returns empty seq if can't be
-found. :)
-declare function sd:read-topic($topic as xs:string) {
-  let $topic-path := $assets-path || "/export" || $topic || ".topic"
-  return if (db:exists($xmldb, $topic))
-  then db:open($xmldb, $topic)
-  else if (file:exists($topic-path))
-  then fn:parse-xml(file:read-text($topic-path))
-  else ()
-};
+if ($browse) then
+  let $in := if (db:exists($xmldb, $topic))
+             then db:open($xmldb, $topic)
+             else fn:parse-xml($default-topic)
+  let $html := xslt:transform($in, fn:parse-xml($xsl-topic))
+  return <response>
+           {$in}
+           <meta>{$default-triples}</meta>
+           {$html}
+         </response>
+else if (db:exists($xmldb, $topic)) then
+  let $in := db:open($xmldb, $topic)
+  return xslt:transform($in, fn:parse-xml($xsl-topic))
+  else
+    let $info := map {
+      "assets-path" : $assets-path,
+      "browse" : $browse,
+      "format" : $format,
+      "host" : $host,
+      "topic" : $topic,
+      "xmldb" : $xmldb
+    }
+    return
+      <html>
+        <style>
+        <![CDATA[
+          body {
+            font-family: "Segoe UI";
+            font-size: 2rem;
+          }
+          .info {
+            border: 1px solid black;
+            min-width: 30rem;
+          }
+          .info tr:nth-child(odd) {
+            background-color: #efe;
+          }
+          .info td {
+            padding: 1rem
+          }
+          .param {
+            font-weight: bold;
+          }
+        ]]>
+        </style>
+        <body>
+          <h1>404</h1>
 
-let $in := sd:read-topic($topic)
-let $html := if ($in)
-             then
-               xslt:transform($in, fn:parse-xml($xsl-topic))
-             else
-               <html>
-                 <body>
-                   404
-
-                   <assets-path>{$assets-path}</assets-path>
-                   <browse>{$browse}</browse>
-                   <format>{$format}</format>
-                   <host>{$host}</host>
-                   <topic>{$topic}</topic>
-                   <xmldb>{$xmldb}</xmldb>
-                 </body>
-               </html>
-
-return if ($browse) then
-<response>{$in}<meta>{$default-triples}</meta>{$html}</response>
-else $html
+          <table class="info">
+            {
+              for $key in map:keys($info)
+              return <tr>
+                       <td class="param">{$key}</td>
+                       <td class="value">{$info($key)}</td>
+                      </tr>
+            }
+          </table>
+        </body>
+    </html>
