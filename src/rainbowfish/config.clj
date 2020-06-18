@@ -1,23 +1,25 @@
 (ns rainbowfish.config
-  (:require [clojure.java.io :as io]
-            [clojure.edn :as edn]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [rainbowfish.file-util :as fu]))
 
 (def cli-params
   "Configuration that is expected to come from the CLI/Startup"
-  (atom {:development-mode true}))
+  (atom {:dev-mode true}))
 
 (defn expand-config
   "Given the config path and the result of reading the EDN at that file,
   expands a few fields that are derived from the config."
   [config-path {:keys [basex-path sites backend] :as config}]
-  (let [flatten-site (fn [{:keys [path xmldb hosts]}]
-                       (map (fn [host]
-                              [host {:assets-path (fu/relpath config-path ".." path)
-                                     :xmldb xmldb}]) hosts))
-        hosts (->> (mapcat flatten-site sites)
-                   (apply concat)
-                   (apply hash-map))]
+  (let [flatten-site
+        (fn [{:keys [path xmldb hosts]}]
+          (let [assets-path (fu/relpath config-path ".." path)
+                host-config {:assets-path assets-path :xmldb xmldb}]
+            (map (fn [host] [host host-config]) hosts)))
+        hosts
+        (->> (mapcat flatten-site sites)
+             (apply concat)
+             (apply hash-map))]
     (conj
      @cli-params
      {:basex-path (fu/relpath config-path ".." basex-path)

@@ -6,7 +6,8 @@
   (r/router
    ["/_RF_"
     ["/complete-topic/*key" {:name ::complete-topic
-                             :handler api/complete-topic}]
+                             :handler #'api/complete-topic}]
     ["/topics/*key" {:name ::topic-by-path
-                     :handler api/topic}]]))
+                     :handler #'api/topic}]]))
+  
 
