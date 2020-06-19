@@ -1,53 +1,44 @@
 (ns rainbowfish.public
   (:require [clojure.java.io :as io]
-            [rainbowfish.config :as config]
             [rainbowfish.file-util :as fu]
-            [rainbowfish.routes :as routes]
             [rainbowfish.xmldb :as xmldb]
-            [reitit.core :as r]
-            [ring.middleware.file :as ring-file]
-            [ring.middleware.params :as params]
-            [ring.middleware.session :as sess]
             [ring.util.request :as req]
             [ring.util.response :as resp]))
 
 (defn get-topic-as-html
   "Renders a topic as html given its request parameters.
    May render a 404."
+  [topic {{:keys [xmldb]} :host-config}]
   (xmldb/query
-   (slurp (io/resource "assets/xquery/public/topics.xq"))
+   (slurp (io/resource "assets/public/topic-as-html.xq"))
    [["$xmldb" xmldb]
     ["$topic" topic]
-    ["$xsl-topic" (slurp (io/resource "assets/xsl/topic.xsl"))]]))
+    ["$xsl-topic" (slurp (io/resource "assets/public/topic-to-html.xsl"))]]))
 
 (defn get-topic-as-xml
   "Renders a topic as html given its request parameters.
    May render a 404."
-  (xmldb/query
-   (slurp (io/resource "assets/xquery/public/topics.xq"))
-   [["$xmldb" xmldb]
-    ["$topic" topic]
-    ["$xsl-topic" (slurp (io/resource "assets/xsl/topic.xsl"))]]))
+  [topic {{:keys [xmldb]} :host-config}]
+  "TODO")
 
 (defn get-provider
   "Return a tuple `[provider content-type]` that knows how to return a
   response given a file format (extension)."
   [extension]
-  ({"html" [render-topic "text/html"]
-    "topic" [render-topic "application/xml"]} extension))
-
-(defn path-to-topic
-  "Converts a request path to a topic."
-  [path]
-  (let [[base name ext] (fu/get-base-name-and-ext path)]
-    [(str (or base "/") (or name "index")) (or ext "html")]))
+  ({"html" [get-topic-as-html "text/html"]
+    "topic" [get-topic-as-xml "application/xml"]} extension))
 
 (defn handle-topic
-  [{{:keys [request-method]} :req
-    {:keys [path-params]} :match
-    {:keys [xmldb]} :host-config}]
-  (let [[path-name path-format] (path-to-topic path-params)]
-    (when-let [[provider content-type] (get-provider path-format)]
-        (->
-         (resp/response (provider info))
-         (resp/content-type content-type))))))
+  [{:keys [req] {:keys [xmldb]} :host-config :as data}]
+  (if (= :get (:request-method req))
+    (let [[topic format] (fu/path-to-topic (req/path-info req))]
+      (when-let [[provider content-type] (get-provider format)]
+        (if (= "true"
+               (xmldb/fire
+                (str "SET BINDINGS $db=" xmldb ", $path=" "index")
+                (str "XQUERY declare variable $db as xs:string external;
+                            declare variable $path as xs:string external;
+                            db:exists($db, $path)")))
+          (->
+           (resp/response (provider topic data))
+           (resp/content-type content-type)))))))

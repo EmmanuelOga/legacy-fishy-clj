@@ -1,7 +1,9 @@
 (ns rainbowfish.client
   (:require [rainbowfish.dom :as dom]
+            [rainbowfish.routes :as routes]
             [reagent.core :as rc]
             [reagent.dom :as rd]
+            [reitit.core :as r]
             [clojure.string :as str]))
 
 (defonce next-id (atom 0))
@@ -67,12 +69,18 @@
         open-topic
         (fn []
           (when-let [query (get-valid-query)]
+            (let [{:keys[path]}
+                  (r/match-by-name
+                   routes/API
+                   :rainbowfish.routes/topic-by-path
+                   {:key query})]
+
             (dom/get-xml
-             (dom/url query :browse true)
+             (dom/url path)
              (fn [xml]
                (if xml
                 (handle-topic-xml query xml)
-                (js/alert "Error connection to API"))))))]
+                (js/alert "Error connection to API")))))))]
     [:<>
      [:label {:for "topic-q"} "URL"]
      [:input {:id "topic-q"

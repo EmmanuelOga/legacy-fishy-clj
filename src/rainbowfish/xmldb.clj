@@ -50,7 +50,11 @@
   (swap! server
          (fn [old-server]
            (when old-server (.stop old-server))
-           (BaseXServer. (into-array [(str "-p" (:port (options)))])))))
+           (BaseXServer. (into-array [(str "-p" (:port (options)))]))))
+
+  ; Ensures the DBs of every site exist.
+  (let [db-names (distinct (map :xmldb (vals (:hosts (config/config)))))]
+    (run! (fn [dbn] (fire (str "CHECK " dbn))) db-names)))
 
 (defn ensure-running
   "Runs the database if it is not running already."

@@ -28,11 +28,11 @@
 
        (or
         (when-let [match (r/match-by-path routes/API (req/path-info req))]
-          (@(:result match) {:req req :match match :host host-config}))
+          (@(:result match) {:req req :match match :host-config host-config}))
 
         (ring-file/file-request req (str assets-path "/static"))
 
-        (public/handle-topic {:req req :match match :host-config host-config})))
+        (@#'public/handle-topic {:req req :host-config host-config})))
 
      (resp/not-found "Resource not found."))))
 

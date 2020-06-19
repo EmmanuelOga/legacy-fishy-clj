@@ -63,3 +63,10 @@
               (io/make-parents dst)
               (io/copy (io/file p) (io/file dst))))
           paths)))
+
+(defn path-to-topic
+  "Converts a request path to a [topic-name extension] tuple."
+  [path]
+  (let [[base name ext] (get-base-name-and-ext path)]
+    [(str (or base "/") (or name "index")) (or ext "html")]))
+

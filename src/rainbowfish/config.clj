@@ -16,6 +16,7 @@
           (let [assets-path (fu/relpath config-path ".." path)
                 host-config {:assets-path assets-path :xmldb xmldb}]
             (map (fn [host] [host host-config]) hosts)))
+
         hosts
         (->> (mapcat flatten-site sites)
              (apply concat)
