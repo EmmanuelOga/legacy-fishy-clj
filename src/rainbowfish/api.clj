@@ -1,5 +1,5 @@
 (ns rainbowfish.api
-  "Request handlers for API methods"
+  "Implementation of the API methods."
   (:require [clojure.java.io :as io]
             [rainbowfish.file-util :as fu]
             [rainbowfish.xmldb :as xmldb]
@@ -20,13 +20,9 @@
   [topic
    {{:keys [path-params]} :match
     {:keys [xmldb]} :host-config}]
-  (xmldb/query
-   (slurp (io/resource "assets/API/topic-get-or-init.xq"))
-   [["$xmldb" xmldb]
-    ["$topic" topic]
-    ["$xsl-topic" (slurp (io/resource "assets/API/topic-to-html-snippet.xsl"))]
-    ["$default-topic" (slurp (io/resource "assets/API/default.topic"))]
-    ["$default-triples" (slurp (io/resource "assets/API/default.ttl"))]]))
+  (xmldb/run-script
+   (xmldb/rf-path "API/topic-get-or-init.xq")
+   {:basepath (xmldb/rf-path ".") :xmldb xmldb :topic topic}))
 
 (defn topic
   "Performs different topic operations depending on HTTP method."

@@ -1,4 +1,5 @@
 (ns rainbowfish.public
+  "Implementation of the providers for the public content of the sites."
   (:require [clojure.java.io :as io]
             [rainbowfish.file-util :as fu]
             [rainbowfish.xmldb :as xmldb]

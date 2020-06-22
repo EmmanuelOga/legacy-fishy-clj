@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topic xmlns="https://eoga.dev/sdoc">
+  <title>Emmanuel</title>
+
+  <description>
+    <p>
+      This is the description.
+    </p>
+  </description>
+
+  <header>
+    <p>
+      This is the header.
+    </p>
+  </header>
+
+  <body>
+    <p>
+      This is the body.
+    </p>
+  </body>
+
+  <footer>
+    <p>
+      This is the footer.
+    </p>
+  </footer>
+</topic>

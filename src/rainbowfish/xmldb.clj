@@ -1,71 +1,27 @@
 (ns rainbowfish.xmldb
-  (:require [clojure.java.io :as io]
-            [rainbowfish.config :as config]
+  (:require [rainbowfish.config :as config]
             [rainbowfish.file-util :as fu]
-            [clojure.string :as s])
+            [clojure.string :as str])
   (:import [org.basex BaseXGUI BaseXServer]
            org.basex.api.client.ClientSession))
-
-(def rf-xmldb-name
-  "Name of the XML database used to hold all assets."
-  "rainbowfish")
 
 (defn ^:dynamic options
   "BaseX Database Options"
   []
-  {:root (:basex-path (config/config))
-   :host "localhost"
+  {:host "localhost"
    :port 1984
    :user "admin"
    :password "admin"})
 
-(defn assets-path
-  "Returns the path where basex stores static files"
+(defn basex-path
+  "Returns the BaseX data path."
   []
-  (fu/relpath (:root (options)) "data" rf-xmldb-name "raw"))
+  (:basex-path (config/config)))
 
-(defonce
-  ^{:doc "Instance of the BaseX DB server for the lifetime of the program"}
-  server
-  (do
-    (System/setProperty "org.basex.path" (:root (options)))
-    ; Inform JAXP APIs of rainbowfish's XSLT factory before calling
-    ; BaseX code.
-    (System/setProperty
-     "javax.xml.transform.TransformerFactory",
-     "rainbowfish.XsltFactory")
-    (atom nil)))
-
-(defn stop
-  "Stops the BaseX server, if it is running."
-  []
-  (swap! server
-         (fn [old-server]
-           (when old-server (.stop old-server))
-           nil)))
-
-(defn restart
-  "Stops the server if there is one running, and starts it again"
-  []
-  (swap! server
-         (fn [old-server]
-           (when old-server (.stop old-server))
-           (BaseXServer. (into-array [(str "-p" (:port (options)))]))))
-
-  ; Ensures the DBs of every site exist.
-  (let [db-names (distinct (map :xmldb (vals (:hosts (config/config)))))]
-    (run! (fn [dbn] (fire (str "CHECK " dbn))) db-names)))
-
-(defn ensure-running
-  "Runs the database if it is not running already."
-  []
-  (if (not @server) (restart)))
-
-(defn launch-gui
-  "The GUI doesn't take a context since it can connect to the local
-  server with its own context."
-  []
-  (BaseXGUI. (make-array String 0)))
+(defn rf-path
+  "Returns a path relative to the basex-path."
+  [path]
+  (fu/relpath (basex-path) "rainbowfish" path))
 
 (defn create-session
   "Creates a network session to talk to BaseX server"
@@ -111,3 +67,62 @@
                             (or typename "xs:string"))) bindings)
              (callback query sess))))))
 
+(defn run-script
+  [path bindings-map]
+  (let [escape-kv (fn [[k v]]
+                    (str "$" (name k) "=" (str/replace v "," ",,")))
+        bindings (str/join ", " (map escape-kv bindings-map))
+        exec (fn [sess cmd]
+               (.execute sess cmd))]
+    (open (fn [sess]
+            (when-not (empty? bindings)
+              (exec sess (str "SET BINDINGS " bindings)))
+            (exec sess (str "RUN " path))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Server
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defonce
+  ^{:doc "Instance of the BaseX DB server for the lifetime of the program"}
+  server
+  (do
+    (System/setProperty "org.basex.path" (basex-path))
+    ; Inform JAXP APIs of rainbowfish's XSLT factory before calling
+    ; BaseX code.
+    (System/setProperty
+     "javax.xml.transform.TransformerFactory",
+     "rainbowfish.XsltFactory")
+    (atom nil)))
+
+(defn stop
+  "Stops the BaseX server, if it is running."
+  []
+  (swap! server
+         (fn [old-server]
+           (when old-server (.stop old-server))
+           nil)))
+
+(defn restart
+  "Stops the server if there is one running, and starts it again"
+  []
+  (swap! server
+         (fn [old-server]
+           (when old-server (.stop old-server))
+           (BaseXServer. (into-array [(str "-p" (:port (options)))]))))
+
+  ; Ensures the DBs of every site exist.
+  (let [db-names (distinct (map :xmldb (vals (:hosts (config/config)))))]
+    (run! (fn [dbn] (fire (str "CHECK " dbn))) db-names)))
+
+(defn ensure-running
+  "Runs the database if it is not running already."
+  []
+  (if (not @server) (restart)))
+
+(defn launch-gui
+  "The GUI doesn't take a context since it can connect to the local
+  server with its own context."
+  []
+  (BaseXGUI. (make-array String 0)))

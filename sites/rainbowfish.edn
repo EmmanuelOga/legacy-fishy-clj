@@ -3,7 +3,9 @@
  :sites
  [{:path "eogadev"
    :xmldb "devoga"
+   :default-author "Emmanuel Oga"
    :hosts ["eogadev" "eoga.dev"]}
    {:path "emmanueloga"
     :xmldb "comoga"
+    :default-author "Emmanuel Oga"
     :hosts ["emmanueloga" "emmanueloga.com"]}]}

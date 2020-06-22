@@ -1,6 +1,7 @@
 (ns rainbowfish.file-util
   (:require [clojure.string :as s]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [clojure.string :as str])
   (:import [java.nio.file Path Paths]))
 
 (defn path-to-string
@@ -33,7 +34,9 @@
   given path."
   [path]
   (->>
-   (let [[pre1 post1] (split-at-last path "/")
+   (let [[pre1 post1] (if (str/includes? path "/")
+                        (split-at-last path "/")
+                        [nil path])
          [pre2 post2] (split-at-last (or post1 pre1) ".")]
      (if (and pre2 post2)
        [pre1 pre2 post2]
@@ -64,9 +67,15 @@
               (io/copy (io/file p) (io/file dst))))
           paths)))
 
+(defn remove-base-slash
+  [path]
+  (str/replace path #"^/+" ""))
+
 (defn path-to-topic
   "Converts a request path to a [topic-name extension] tuple."
   [path]
   (let [[base name ext] (get-base-name-and-ext path)]
-    [(str (or base "/") (or name "index")) (or ext "html")]))
+    [(remove-base-slash
+      (str (or base "") "/" (or name "index")))
+     (or ext "html")]))
 
