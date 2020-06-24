@@ -13,3 +13,9 @@
     ["/topics/*key"
      {:name ::topic-by-path
       #?@(:clj [:handler #'api/topic])}]]))
+
+(defn topic-by-path
+  [query]
+  (:path (r/match-by-name API ::topic-by-path {:key query})))
+                  
+

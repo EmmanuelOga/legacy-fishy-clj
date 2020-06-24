@@ -62,7 +62,7 @@ label {
   flex-direction: row;
 }
 
-.topic-module {
+.topicmod {
   margin: 1rem;
   box-shadow: .25rem .25rem 1rem 0 rgba(0, 0, 0, .125);
   min-width: 50rem;
@@ -74,11 +74,11 @@ label {
   flex-direction: column;
 }
 
-.topic-module.selected {
+.topicmod.selected {
   outline: 1px solid green;
 }
 
-.topic-module .toolbar {
+.topicmod .toolbar {
   margin: .25rem;
   padding: .25rem;
 
@@ -89,16 +89,16 @@ label {
   border-bottom: 1px solid rgba(0, 0, 0, .125);
 }
 
-.topic-module .toolbar > * {
+.topicmod .toolbar > * {
   margin: .125rem;
 }
 
-.topic-module .toolbar .name {
+.topicmod .toolbar .name {
     font-weight: bold;
     flex: 1;
 }
 
-.topic-module .content {
+.topicmod .content {
   margin-left: .25rem;
 
   flex: 1;
@@ -109,7 +109,7 @@ label {
   flex-direction: column;
 }
 
-.topic-module .content > div {
+.topicmod .content > div {
   padding: .5rem;
 
   border-right: .25rem solid white;
@@ -120,34 +120,34 @@ label {
   overflow: auto;
 }
 
-.topic-module .content textarea {
+.topicmod .content textarea {
   width: 100%;
   height: 100%;
   margin-top: .5rem;
 }
 
-.topic-module .content .meta textarea {
+.topicmod .content .meta textarea {
   min-height: 15rem;
 }
 
-.topic-module .content .topic textarea {
+.topicmod .content .topic textarea {
   min-height: 30rem;
 }
 
-.topic-module .content .preview {
+.topicmod .content .preview {
   flex: 1;
   border-radius: .25rem;
   height: 100%;
 }
 
-.topic-module .content .preview details {
+.topicmod .content .preview details {
     height: 100%;
     width: 100%;
 
     position: relative;
 }
 
-.topic-module .content .preview details div.content {
+.topicmod .content .preview details div.content {
     position: absolute;
 
     margin: .25rem;

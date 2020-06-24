@@ -1,4 +1,5 @@
-(ns rainbowfish.dom)
+(ns rainbowfish.dom
+  (:require [clojure.string :as str]))
 
 (defn get-ancestor
   [node selector]
@@ -110,14 +111,21 @@
 
 (defn serialize-xml
   [fragment]
-  (.serializeToString (js/XMLSerializer.) fragment))
+  (.serializeToString
+   (js/XMLSerializer.)
+   fragment))
 
-(defn get-xml
-  [url callback]
-  (-> (js/fetch (js/Request. url))
+(defn request
+  [url options callback]
+  (-> (js/fetch (js/Request. url) (clj->js options))
       (.then (fn [res]
                (let [status (.-status res)]
                  (if (and (>= status 200) (< status 300))
-                    (-> (.text res)
-                        (.then (fn [text] (callback (parse-xml text)))))
-                    (callback nil)))))))
+                   (-> (.text res)
+                       (.then (fn [text] (callback (parse-xml text)))))
+                   (callback nil)))))))
+
+(defn danger
+  "This is react way to escape inserting inner html"
+  [html]
+  {:dangerouslySetInnerHTML {:__html html}})

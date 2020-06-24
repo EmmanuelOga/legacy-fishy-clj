@@ -41,7 +41,7 @@
       (xml-response (str "<delete/>"))
 
       :put
-      (xml-response (str "<update/>"))
+      (xml-response (str "<update>" path-params "</update>"))
 
       (-> (resp/bad-request
            (str "<error>Unknown request: " request-method "</error>"))
