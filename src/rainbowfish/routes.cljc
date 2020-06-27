@@ -8,7 +8,7 @@
 
     ["/complete-topic/*key"
      {:name ::complete-topic
-      #?@(:clj [:handler #'api/complete-topic])}]
+      #?@(:clj [:handler #'api/topic-complete])}]
 
     ["/topics/*key"
      {:name ::topic-by-path

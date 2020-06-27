@@ -4,8 +4,7 @@
             [rainbowfish.file-util :as fu])
   (:import [org.basex BaseXGUI BaseXServer]
            org.basex.api.client.ClientSession
-           org.basex.core.cmd.Add
-           org.basex.core.cmd.Replace))
+           [org.basex.core.cmd Add Replace]))
 
 (defn ^:dynamic options
   "BaseX Database Options"

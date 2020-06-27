@@ -18,6 +18,10 @@
   (let [key (new-id)]
     (swap! topic-data assoc key (assoc data :key key))))
 
+(defn topicmod-update
+  [{:keys[key] :as data}]
+  (swap! topic-data assoc key data))
+
 (defn topicmod-close
   [key]
   (swap! topic-data dissoc key))
@@ -36,7 +40,12 @@
               js/JSON.stringify)}
    (fn [xml]
      (if xml
-       (js/console.log xml)
+       (topicmod-update
+        {:key key
+         :path path
+         :sdoc (.-outerHTML (dom/query xml "topic"))
+         :meta (.-textContent (dom/query xml "meta"))
+         :html (.-innerHTML (dom/query xml "html"))})
        (js/alert "Error saving the topic.")))))
 
 (defn topicmod
