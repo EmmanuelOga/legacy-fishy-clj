@@ -44,8 +44,8 @@
        (topicmod-update
         {:key key
          :path path
-         :sdoc (gob/get result "topic")
          :meta (gob/get result "meta")
+         :sdoc (gob/get result "sdoc")
          :html (gob/get result "html")})
        (js/alert "Error saving the topic.")))))
 
@@ -56,13 +56,19 @@
     [:div.topicmod
      [:div.toolbar
       [:div.name path]
-      [:button.save   {:on-click (fn [_] (topicmod-save
-                                          {:key key
-                                           :path path
-                                           :meta (.-value @ta-meta)
-                                           :sdoc (.-value @ta-sdoc)}))} "Save"]
-      [:button.delete {:on-click (fn [_] (topicmod-delete key))} "Delete"]
-      [:button.close  {:on-click (fn [_] (topicmod-close key))} "Close"]]
+      [:button.save {:on-click
+                     (fn [_]
+                       (topicmod-save
+                        {:key key
+                         :path path
+                         :meta (.-value @ta-meta)
+                         :sdoc (.-value @ta-sdoc)}))} "Save"]
+
+      [:button.delete {:on-click
+                       (fn [_] (topicmod-delete key))} "Delete"]
+
+      [:button.close {:on-click
+                      (fn [_] (topicmod-close key))} "Close"]]
      [:div.content
       [:div.status]
       [:div.meta
