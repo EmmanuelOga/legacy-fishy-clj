@@ -27,8 +27,8 @@
   (if (= :get (:request-method req))
     (let [[topic format] (fu/path-to-topic (req/path-info req))]
       (when-let [[provider content-type] (get-provider format)]
-        (let [raw (provider topic content-type data)
-              [{:strs[code]} payload] (xmldb/extract-parts raw)]
+        (let [result (provider topic content-type data)
+              [{:strs[code]} payload] (xmldb/extract-parts result)]
           (->
             (resp/response payload)
             (resp/content-type content-type)))))))

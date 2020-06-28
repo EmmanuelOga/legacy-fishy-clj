@@ -105,16 +105,6 @@
     (run! set-param (seq params))
     url))
 
-(defn parse-xml
-  [text]
-  (-> (js/window.DOMParser.) (.parseFromString text "text/xml")))
-
-(defn serialize-xml
-  [fragment]
-  (.serializeToString
-   (js/XMLSerializer.)
-   fragment))
-
 (defn request
   [url options callback]
   (-> (js/fetch (js/Request. url) (clj->js options))
@@ -122,9 +112,9 @@
                (let [status (.-status res)]
                  (if (and (>= status 200) (< status 300))
                    (-> (.text res)
-                       (.then (fn [text] (callback (parse-xml text)))))
+                       (.then (fn [text] (callback (js/JSON.parse text)))))
                    (callback nil)))))))
-
+      
 (defn danger
   "This is react way to escape inserting inner html"
   [html]

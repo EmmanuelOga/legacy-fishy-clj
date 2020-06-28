@@ -1,6 +1,5 @@
 (ns rainbowfish.api
   "Implementation of the API methods."
-
   (:require [clojure.java.io :as io]
             [jsonista.core :as j]
             [rainbowfish.file-util :as fu]
@@ -21,30 +20,38 @@
   [topic {{:keys [xmldb]} :host-config}]
   (xmldb/run-script
    (xmldb/rf-path "API/topic-get-or-init.xq")
-   {:basepath (xmldb/rf-path ".") :xmldb xmldb :topic topic}))
+   {:basepath (xmldb/rf-path ".")
+    :xmldb xmldb
+    :topic topic}))
 
 (defn topic-replace
-  [topic body {{:keys [xmldb]} :host-config}]
-  (let [json (j/read-value body)
-        sdoc (json "sdoc")
-        meta (json "meta")]
-    (xmldb/replace-doc xmldb (str "/" topic) sdoc)
-    (xmldb/run-script
-     (xmldb/rf-path "API/topic-get-or-init.xq")
-     {:basepath (xmldb/rf-path ".") :xmldb xmldb :topic topic :body body})))
+  [topic
+   {:strs[sdoc meta]}
+   {{:keys [xmldb]} :host-config :as data}]
+  (xmldb/replace-doc xmldb (str "/" topic) sdoc)
+  (topic-get-or-default topic data))
+
+(defn interpret-result
+  [basex-response]
+  (let [[{:strs[code content-type]} payload]
+        (xmldb/extract-parts basex-response)]
+    ; Ignore code for now, always return 200.
+    (-> payload
+        (resp/response)
+        (resp/content-type content-type))))
 
 (defn topic
   "Performs different topic operations depending on HTTP method."
   [{:keys [req]
-    {:keys [request-method]} :req
+    {:keys [request-method body]} :req
     {:keys [path-params]} :match
     {:keys [xmldb]} :host-config :as data}]
   (let [[topic _] (fu/path-to-topic (:key path-params))]
     (case request-method
       :get
-      (-> (topic-get-or-default topic data)
-          (resp/response)
-          (resp/content-type "application/json"))
+      (->
+        (topic-get-or-default topic data)
+        (interpret-result))
 
       :delete
       (-> "<delete/>"
@@ -52,12 +59,11 @@
           (resp/content-type "application/xml"))
 
       :put
-      (let [body (:body req)
-            encoding (or (request/character-encoding req) "UTF-8")
-            body-string (slurp body :encoding encoding)]
-        (-> (topic-replace topic body-string data)
-            (resp/response)
-            (resp/content-type "application/xml")))
+      (let [encoding (or (request/character-encoding req) "UTF-8")
+            body-parsed (j/read-value (slurp body :encoding encoding))]
+        (->
+            (topic-replace topic body-parsed data)
+            (interpret-result)))
 
       (-> (resp/bad-request
            (str "<error>Unknown request: " request-method "</error>"))

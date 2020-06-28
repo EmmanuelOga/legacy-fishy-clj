@@ -19,7 +19,7 @@
     (swap! topic-data assoc key (assoc data :key key))))
 
 (defn topicmod-update
-  [{:keys[key] :as data}]
+  [{:keys [key] :as data}]
   (swap! topic-data assoc key data))
 
 (defn topicmod-close
@@ -38,14 +38,14 @@
     :headers {:Content-Type "application/json"}
     :body (-> (clj->js {:meta meta :sdoc sdoc})
               js/JSON.stringify)}
-   (fn [xml]
-     (if xml
+   (fn [result]
+     (if result
        (topicmod-update
         {:key key
          :path path
-         :sdoc (.-outerHTML (dom/query xml "topic"))
-         :meta (.-textContent (dom/query xml "meta"))
-         :html (.-innerHTML (dom/query xml "html"))})
+         :sdoc (goog.object/get result "topic")
+         :meta (goog.object/get result "meta")
+         :html (goog.object/get result "html")})
        (js/alert "Error saving the topic.")))))
 
 (defn topicmod
@@ -89,24 +89,19 @@
             (if (and (.checkValidity @input) (not (empty? val)))
               (if (str/starts-with? val "/") val (str "/" val)))))
 
-        handle-topic-xml
-        (fn [path xml]
-          (topicmod-add
-           {:path path
-            :sdoc (.-outerHTML (dom/query xml "topic"))
-            :meta (.-textContent (dom/query xml "meta"))
-            :html (.-innerHTML (dom/query xml "html"))}))
-
         attempt-open-topic
         (fn []
           (when-let [query (get-valid-query)]
             (dom/request
              (dom/url (routes/topic-by-path query))
-             {:method "GET"
-              :headers {:Content-Type "application/xml"}}
-             (fn [xml]
-               (if xml
-                 (handle-topic-xml query xml)
+             {:method "GET" :headers {:Content-Type "application/json"}}
+             (fn [result]
+               (if result
+                 (topicmod-add
+                  {:path query
+                   :meta (goog.object/get result "meta")
+                   :sdoc (goog.object/get result "sdoc")
+                   :html (goog.object/get result "html")})
                  (js/alert "Error connection to API"))))))]
     [:<>
      [:label {:for "topic-q"} "URL"]
