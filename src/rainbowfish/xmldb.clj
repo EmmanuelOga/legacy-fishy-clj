@@ -1,11 +1,11 @@
 (ns rainbowfish.xmldb
   (:require [clojure.string :as str]
             [rainbowfish.config :as config]
-            [rainbowfish.file-util :as fu])
+            [rainbowfish.file-util :as fu]
+            [jsonista.core :as j])
   (:import [org.basex BaseXGUI BaseXServer]
            org.basex.api.client.ClientSession
-           org.basex.core.cmd.Add
-           org.basex.core.cmd.Replace))
+           [org.basex.core.cmd Add Replace]))
 
 (defn ^:dynamic options
   "BaseX Database Options"
@@ -94,6 +94,12 @@
 (defn replace-doc
   [xmldb path doc]
   (fire-cmd xmldb path  (Replace. path doc)))
+
+(defn extract-parts
+  [basex-resp]
+  (let [[first rest] (str/split basex-resp #"===BOUNDARY===" 2)
+        meta (j/read-value first)]
+    [meta rest]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Server

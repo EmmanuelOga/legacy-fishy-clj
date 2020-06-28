@@ -1,5 +1,6 @@
 (ns rainbowfish.api
   "Implementation of the API methods."
+
   (:require [clojure.java.io :as io]
             [jsonista.core :as j]
             [rainbowfish.file-util :as fu]
@@ -43,7 +44,7 @@
       :get
       (-> (topic-get-or-default topic data)
           (resp/response)
-          (resp/content-type "application/xml"))
+          (resp/content-type "application/json"))
 
       :delete
       (-> "<delete/>"

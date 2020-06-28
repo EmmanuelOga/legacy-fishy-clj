@@ -19,14 +19,16 @@ let $in := if (db:exists($xmldb, $topic))
              replace value of node sd:topic/sd:title with $topic
            }
 let $html := $in => xslt:transform($basepath || "/API/topic-to-html-snippet.xsl")
-return
-  <response status="200">
-    <!-- Topic -->
-    {$in}
 
-    <!-- Meta -->
-    <meta>{file:read-text($basepath || "/API/default.ttl")}</meta>
+let $json-options : = map { 'format' : 'xquery', 'indent' : 'no' },
+return (
+  (: Data for the HTTPD :)
+  json:serialize(map {'code' : 200}, $json-options),
 
-    <!-- Preview -->
-    {$html}
-  </response>
+  (: Client payload :)
+  json:serialize(map {
+    'meta': file:read-text($basepath || "/API/default.ttl")
+    'sdoc': $in,
+    'html': $html,
+  }, $json-options)
+)
