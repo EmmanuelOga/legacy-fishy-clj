@@ -26,7 +26,7 @@ return (
   (: Client payload :)
   json:serialize(
     map {'meta': file:read-text($basepath || "/API/default.ttl"),
-         'sdoc': $in,
+         'sdoc': serialize($in),
          'html': $html},
     $json-options)
 )

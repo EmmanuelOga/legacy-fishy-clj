@@ -4,6 +4,7 @@
             [reagent.core :as rc]
             [reagent.dom :as rd]
             [reitit.core :as r]
+            [goog.object :as gob]
             [clojure.string :as str]))
 
 (defonce next-id (atom 0))
@@ -43,9 +44,9 @@
        (topicmod-update
         {:key key
          :path path
-         :sdoc (goog.object/get result "topic")
-         :meta (goog.object/get result "meta")
-         :html (goog.object/get result "html")})
+         :sdoc (gob/get result "topic")
+         :meta (gob/get result "meta")
+         :html (gob/get result "html")})
        (js/alert "Error saving the topic.")))))
 
 (defn topicmod
@@ -99,9 +100,9 @@
                (if result
                  (topicmod-add
                   {:path query
-                   :meta (goog.object/get result "meta")
-                   :sdoc (goog.object/get result "sdoc")
-                   :html (goog.object/get result "html")})
+                   :meta (gob/get result "meta")
+                   :sdoc (gob/get result "sdoc")
+                   :html (gob/get result "html")})
                  (js/alert "Error connection to API"))))))]
     [:<>
      [:label {:for "topic-q"} "URL"]
