@@ -26,18 +26,29 @@
 
 (defn topic-replace
   [topic
-   {:strs[sdoc meta]}
+   {:strs [sdoc meta]}
    {{:keys [xmldb]} :host-config :as data}]
-  (xmldb/replace-doc xmldb (str "/" topic) sdoc)
-  (topic-get-or-default topic data))
+
+  (let [raw-validation (xmldb/run-script
+                        (xmldb/rf-path "API/topic-validate.xq")
+                        {:xmldb xmldb
+                         :topic ""
+                         :basepath (xmldb/rf-path ".")
+                         :topic-string sdoc})
+        [{:strs [valid]}] (xmldb/extract-parts raw-validation)]
+    (if valid
+      (do
+        (xmldb/replace-doc xmldb (str "/" topic) sdoc)
+        (topic-get-or-default topic data))
+      raw-validation)))
 
 (defn interpret-result
   [basex-response]
-  (let [[{:strs[code content-type]} payload]
+  (let [[{:strs [code content-type]} payload]
         (xmldb/extract-parts basex-response)]
-    ; Ignore code for now, always return 200.
-    (-> payload
-        (resp/response)
+    (-> (if (and (>= code 200) (< code 300))
+          (resp/response payload)
+          (resp/bad-request payload))
         (resp/content-type content-type))))
 
 (defn topic
@@ -50,8 +61,8 @@
     (case request-method
       :get
       (->
-        (topic-get-or-default topic data)
-        (interpret-result))
+       (topic-get-or-default topic data)
+       (interpret-result))
 
       :delete
       (-> "<delete/>"
@@ -62,8 +73,8 @@
       (let [encoding (or (request/character-encoding req) "UTF-8")
             body-parsed (j/read-value (slurp body :encoding encoding))]
         (->
-            (topic-replace topic body-parsed data)
-            (interpret-result)))
+         (topic-replace topic body-parsed data)
+         (interpret-result)))
 
       (-> (resp/bad-request
            (str "<error>Unknown request: " request-method "</error>"))

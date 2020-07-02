@@ -97,9 +97,8 @@
 
 (defn extract-parts
   [basex-resp]
-  (let [[first rest] (str/split basex-resp #"===BOUNDARY===" 2)
-        meta (j/read-value first)]
-    [meta rest]))
+  (let [[first rest] (str/split basex-resp #"===BOUNDARY===" 2)]
+    [(j/read-value first) rest]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Server

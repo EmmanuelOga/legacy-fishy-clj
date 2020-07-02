@@ -17,6 +17,7 @@
   metosin/reitit {:mvn/version "0.5.2"}
   metosin/jsonista {:mvn/version "0.2.6"}
   expound {:mvn/version "0.8.4"}
+  spootnik/unilog {:mvn/version "0.7.24"}
 
   ; XML
   net.sf.saxon/Saxon-HE {:mvn/version "10.1"}

@@ -23,6 +23,13 @@
   [{:keys [key] :as data}]
   (swap! topic-data assoc key data))
 
+(defn topicmod-partial-update
+  [{:keys [key] :as data}]
+  (swap!
+   topic-data
+   (fn [prev-data]
+     (assoc prev-data key (merge (prev-data key) data)))))
+
 (defn topicmod-close
   [key]
   (swap! topic-data dissoc key))
@@ -39,18 +46,28 @@
     :headers {:Content-Type "application/json"}
     :body (-> (clj->js {:meta meta :sdoc sdoc})
               js/JSON.stringify)}
-   (fn [result]
-     (if result
+   (fn [status result]
+     (if (= 200 status)
        (topicmod-update
         {:key key
          :path path
+         :errors (js->clj (gob/get result "errors" #js []))
          :meta (gob/get result "meta")
          :sdoc (gob/get result "sdoc")
          :html (gob/get result "html")})
-       (js/alert "Error saving the topic.")))))
+       (topicmod-partial-update
+        {:key key :errors (js->clj (gob/get result "errors" #js []))})))))
+
+(defn error-detail
+  [idx {:strs[level message line column]}]
+  ^{:key idx}
+  [:div.error {:class level}
+   [:span.line "Line: " line]
+   [:span.column "Col: " column]
+   [:span.message message]])
 
 (defn topicmod
-  [{:keys [key path sdoc meta html]}]
+  [{:keys [key path sdoc meta html errors]}]
   (let [ta-sdoc (rc/atom nil) ta-meta (rc/atom nil)]
     ^{:key key}
     [:div.topicmod
@@ -70,7 +87,8 @@
       [:button.close {:on-click
                       (fn [_] (topicmod-close key))} "Close"]]
      [:div.content
-      [:div.status]
+      [:div.status
+       (map-indexed error-detail errors)]
       [:div.meta
        [:details
         [:summary "Meta"]
@@ -102,8 +120,8 @@
             (dom/request
              (dom/url (routes/topic-by-path query))
              {:method "GET" :headers {:Content-Type "application/json"}}
-             (fn [result]
-               (if result
+             (fn [status result]
+               (if (= status 200)
                  (topicmod-add
                   {:path query
                    :meta (gob/get result "meta")

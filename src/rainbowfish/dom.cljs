@@ -107,14 +107,16 @@
 
 (defn request
   [url options callback]
-  (-> (js/fetch (js/Request. url) (clj->js options))
-      (.then (fn [res]
-               (let [status (.-status res)]
-                 (if (and (>= status 200) (< status 300))
-                   (-> (.text res)
-                       (.then (fn [text] (callback (js/JSON.parse text)))))
-                   (callback nil)))))))
-      
+  (.then
+   (js/fetch (js/Request. url) (clj->js options))
+   (fn [res]
+     (.then
+      (.text res)
+      (fn [text]
+        (callback
+         (.-status res)
+         (try (js/JSON.parse text))))))))
+
 (defn danger
   "This is react way to escape inserting inner html"
   [html]
