@@ -1,6 +1,7 @@
 (ns rainbowfish.client
   (:require [rainbowfish.dom :as dom]
             [rainbowfish.routes :as routes]
+            [rainbowfish.codem :as codem]
             [reagent.core :as rc]
             [reagent.dom :as rd]
             [reitit.core :as r]
@@ -69,19 +70,19 @@
 
 (defn topicmod
   [{:keys [key path sdoc meta html sdoc-errors]}]
-  (let [ta-sdoc (rc/atom nil) ta-meta (rc/atom nil)]
+  (let [atom-sdoc (rc/atom sdoc)
+        atom-meta (rc/atom meta)
+        save (fn [_]
+          (topicmod-save
+           {:key key
+            :path path
+            :meta @atom-meta
+            :sdoc @atom-sdoc}))]
     ^{:key key}
     [:div.topicmod
      [:div.toolbar
       [:div.name path]
-      [:button.save
-       {:on-click
-        (fn [_]
-          (topicmod-save
-           {:key key
-            :path path
-            :meta (.-value @ta-meta)
-            :sdoc (.-value @ta-sdoc)}))} "Save"]
+      [:button.save {:on-click save} "Save"]
 
       [:button.delete
        {:on-click
@@ -92,17 +93,16 @@
         (fn [_] (topicmod-close key))} "Close"]]
      [:div.content
       [:div.meta
-       [:details
+       [:details {:open true}
         [:summary "Meta"]
-        [:textarea {:defaultValue meta
-                    :ref #(reset! ta-meta %)}]]]
+        [:div.status]
+        [codem/code-mirror atom-meta {:opts {:mode "text/rdf"} :on-save save}]]]
       [:div.topic
        [:details {:open true}
         [:summary "Source"]
         [:div.status
-         (map-indexed error-detail sdoc-errors)]
-        [:textarea {:defaultValue sdoc
-                    :ref #(reset! ta-sdoc %)}]]]
+         (doall (map-indexed error-detail sdoc-errors))]
+        [codem/code-mirror atom-sdoc {:opts {:mode "text/xml"} :on-save save}]]]
       [:div.preview
        [:details {:open true}
         [:summary "Preview"]
