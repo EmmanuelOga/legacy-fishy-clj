@@ -5,18 +5,17 @@
 }
 
 ::-webkit-scrollbar {
-  width: .5em;
-  height: .5em;
+  width: .5rem;
+  height: .5rem;
 }
  
 ::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, .15);
-  border-radius: .15rem;
 }
  
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 32, 0, .5);
-  border-radius: .15rem;
+  border-radius: .5rem;
   padding: .5rem;
 }
 
@@ -124,14 +123,15 @@ label {
   width: 100%;
   height: 100%;
   margin-top: .5rem;
+  resize: vertical;
 }
 
 .topicmod .content .meta textarea {
-  min-height: 15rem;
+  min-height: 10rem;
 }
 
 .topicmod .content .topic textarea {
-  min-height: 30rem;
+  min-height: 10rem;
 }
 
 .topicmod .content .preview {
@@ -165,23 +165,23 @@ label {
 
 .topicmod .error {
     padding: .25rem 0;
-    background-color: #eee;
-    border-radius: .25rem;
+    margin: .25rem 0;
+    border-bottom: 2px dotted lightgray;
 }
 
 .topicmod .line,
 .topicmod .column {
+    font-size: .75rem;
     display: inline-block;
-    padding: 0 .25rem;
-    margin-right: .25rem;
-    color: white;
-    background-color: green;
+    padding: .125rem .25rem;
+    margin-right: .5rem;
+    background-color: greenyellow;
+    border-radius: .5rem;
 }
 
 .topicmod .message {
     font-style: italic;
 }
-             
 
 #topic-q {
   min-width: 15rem;

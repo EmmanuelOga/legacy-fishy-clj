@@ -62,8 +62,8 @@
   [idx {:strs[level message line column]}]
   ^{:key idx}
   [:div.error {:class level}
-   [:span.line "Line: " line]
-   [:span.column "Col: " column]
+   [:span.line "Line " line]
+   [:span.column "Col " column]
    [:span.message message]])
 
 (defn topicmod
@@ -87,16 +87,16 @@
       [:button.close {:on-click
                       (fn [_] (topicmod-close key))} "Close"]]
      [:div.content
-      [:div.status
-       (map-indexed error-detail errors)]
       [:div.meta
        [:details
         [:summary "Meta"]
         [:textarea {:defaultValue meta
                     :ref #(reset! ta-meta %)}]]]
       [:div.topic
-       [:details
+       [:details {:open (not (empty? errors))}
         [:summary "Source"]
+        [:div.status
+        (map-indexed error-detail errors)]
         [:textarea {:defaultValue sdoc
                     :ref #(reset! ta-sdoc %)}]]]
       [:div.preview
