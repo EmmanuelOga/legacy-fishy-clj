@@ -19,7 +19,10 @@ let $html := $in => xslt:transform($basepath || "/API/topic-to-html-snippet.xsl"
 let $json-options := map { 'format' : 'xquery', 'indent' : 'no' }
 return (
   (: Data for the HTTPD :)
-  json:serialize(map {'code' : 200, 'content-type' : 'application/json'}, $json-options),
+  json:serialize(map {
+    'code' : 200,
+    'content-type' : 'application/json'
+  }, $json-options),
 
   "===BOUNDARY===",
 
