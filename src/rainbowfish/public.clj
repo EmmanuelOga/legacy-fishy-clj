@@ -1,6 +1,6 @@
 (ns rainbowfish.public
   "Implementation of the providers for the public content of the sites."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.tools.logging :as log]
             [rainbowfish.file-util :as fu]
             [rainbowfish.xmldb :as xmldb]
             [ring.util.request :as req]
@@ -28,7 +28,8 @@
     (let [[topic format] (fu/path-to-topic (req/path-info req))]
       (when-let [[provider content-type] (get-provider format)]
         (let [result (provider topic content-type data)
-              [{:strs[code]} payload] (xmldb/extract-parts result)]
+              [{:strs [code] :as opmeta} payload] (xmldb/extract-parts result)]
+          (log/info "public: GET topic" {:xmldb xmldb :opmeta opmeta})
           (->
-            (resp/response payload)
-            (resp/content-type content-type)))))))
+           (resp/response payload)
+           (resp/content-type content-type)))))))

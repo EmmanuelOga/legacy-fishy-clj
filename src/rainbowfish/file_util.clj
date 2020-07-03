@@ -45,7 +45,7 @@
 
 (defn rm-rf [fname]
   "Deletes the file (recursively if it is a directory."
-  (run! io/delete-file (-> (io/file fname) file-seq reverse )))
+  (run! io/delete-file (-> (io/file fname) file-seq reverse)))
 
 (defn file-to-path
   "Returns a Path given a file."

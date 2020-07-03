@@ -1,6 +1,6 @@
 (ns rainbowfish.api
   "Implementation of the API methods."
-  (:require [clojure.java.io :as io]
+  (:require [clojure.tools.logging :as log]
             [jsonista.core :as j]
             [rainbowfish.file-util :as fu]
             [rainbowfish.xmldb :as xmldb]
@@ -35,7 +35,10 @@
                          :topic ""
                          :basepath (xmldb/rf-path ".")
                          :topic-string sdoc})
-        [{:strs [valid]}] (xmldb/extract-parts raw-validation)]
+        [{:strs [valid] :as opmeta}] (xmldb/extract-parts raw-validation)]
+    (log/info
+     "TOPIC REPLACE"
+     {:sdoc sdoc :meta meta :xmldb xmldb :opmeta opmeta})
     (if valid
       (do
         (xmldb/replace-doc xmldb (str "/" topic) sdoc)

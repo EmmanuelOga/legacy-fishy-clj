@@ -17,5 +17,5 @@
 (defn topic-by-path
   [query]
   (:path (r/match-by-name API ::topic-by-path {:key query})))
-                  
+
 

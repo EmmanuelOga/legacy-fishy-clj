@@ -4,6 +4,6 @@
 (defn start
   []
   (start-logging!
-   {:console true
+   {:console false
     :level "info"
     :files ["./log/app.log"]}))

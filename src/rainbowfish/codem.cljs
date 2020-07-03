@@ -7,46 +7,39 @@
             [reagent.core :as rc]
             [reagent.dom :as rd]))
 
-(defn code-mirror
-  [value-atom & {:keys [style opts on-init on-change on-save]}]
+(defonce instances (atom {}))
 
-  (let [cm (atom nil)]
-    (rc/create-class
-     {:component-did-mount
-      (fn [this]
-        (let [el (rd/dom-node this)
-              options (clj->js
-                       (merge
-                        {:autoCloseBrackets true
-                         :autofocus true
-                         :inputStyle "contenteditable"
-                         :keyMap "vim"
-                         :lineNumbers true
-                         :matchBrackets true,
-                         :showCursorWhenSelecting true,
-                         :value @value-atom
-                         :viewportMargin js/Infinity}
-                        opts))
-              instance (codemirror. el options)]
-          (reset! cm instance)
-          (.on instance "change"
-               (fn [] (let [value (.getValue instance)]
-                        (when (not= value @value-atom)
-                          (when on-change (on-change value))
-                          (reset! value-atom value)))))
-          (when on-init (on-init instance))))
+(defn read
+  [key]
+  (.getValue (@instances key)))
 
-      :component-did-update
-      (fn [this old-argv]
-        (when-not (= @value-atom (.getValue @cm))
-          (.setValue @cm @value-atom)
-          ;; reset the cursor to the end of the text, if the text was changed externally
-          (let [last-line (.lastLine @cm)
-                last-ch (count (.getLine @cm last-line))]
-            (.setCursor @cm last-line last-ch))))
+(defn create
+  [key val opts]
+  (rc/create-class
+   {:component-did-mount
+    (fn [this]
+      (let [options (clj->js
+                     (merge
+                      {:autoCloseBrackets true
+                       :inputStyle "contenteditable"
+                       :keyMap "vim"
+                       :lineNumbers true
+                       :matchBrackets true,
+                       :showCursorWhenSelecting true,
+                       :value val
+                       :viewportMargin js/Infinity}
+                      opts))]
+        (swap! instances assoc key (codemirror. (rd/dom-node this) options))))
 
-      :reagent-render
-      (fn [_ _ _]
-        @value-atom
-        [:div {:style style}])})))
+    :component-did-update
+    (fn [this]
+      (when-let [instance (@instances key)]
+        (.setValue (@instances key) val)))
+
+    :component-will-unmount
+    (fn [this]
+      (swap! instances dissoc key))
+
+    :reagent-render
+    (fn [_ _ _] [:div])}))
 

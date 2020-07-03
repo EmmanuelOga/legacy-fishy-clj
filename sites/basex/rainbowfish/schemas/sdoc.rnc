@@ -11,41 +11,22 @@ start = sdoc-element-topic
 
 sdoc-element-topic = element topic {
   attribute creation-date { xs:date } ? &
+  attribute pub-date { xs:date } ? &
 
-  attribute publication-date { xs:date } ? &
-
-  # Specifies the way to render the topic. Ex.: "root-page" or "default".
-  attribute theme { xs:string } ? &
-
-  # Pure text title of the Topic. Example uses: table of content
-  # appearences, <title> tag on HTML for standalone topics, etc.
   element title { text } &
 
   # Labels are the default label to use when linking to a topic.
   # If label is missing, the label should default to the title text.
   element label { text } ? &
 
-  # Could be used to describe the topic by a search engine.
-  # This description allows block content but should be kept succinct.
-  #
-  # When generating HTML, it is used to add a meta-description for
-  # search engines by stripping the markup and using just the text.
+  # Succinct description.
   element description { sdoc-block-element } &
 
-  # Authors full names.
-  element author { text } * &
-
-  # How the elements on each of these areas are displayed is up to the
-  # current theme.
   element header { sdoc-block-element * } ? &
   element body { sdoc-block-element * } ? &
   element footer { sdoc-block-element * } ? &
 
-  # These can be defined to link to other pages. How the elements on
-  # each of these areas are displayed is up to the current theme. For
-  # instance, the standalone theme can use these to piece together a
-  # blog post, the root site can use it to build the main nav.
-  element collection {
+  element references {
     attribute key { xs:NMTOKEN } &
     attribute title { text } &
     attribute glob { text } ? &
@@ -76,6 +57,7 @@ sdoc-block-element =
 sdoc-inline-element = 
   sdoc-inline-ref |
   sdoc-inline-a |
+  sdoc-inline-img |
   sdoc-element-nav
 
 sdoc-block-p = element p {
@@ -121,4 +103,10 @@ sdoc-inline-a = element a {
   attribute href { text } &
   attribute rel { text } ? &
   (text | sdoc-inline-element) *
+}
+
+sdoc-inline-img = element img {
+  attribute src { xs:anyURI } &
+  attribute style { text } ? &
+  attribute alt { text } ?
 }

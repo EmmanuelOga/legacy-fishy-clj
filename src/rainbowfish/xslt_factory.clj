@@ -10,7 +10,7 @@
   instance of Saxon Processor"
   (atom []))
 
-(defn -configure 
+(defn -configure
   "Generated Java class will call this method right after
   construction. Here we get a chance to grab Saxon's processor for
   configuration purposes (for example, adding extension functions)."

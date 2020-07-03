@@ -8,39 +8,38 @@
             [goog.object :as gob]
             [clojure.string :as str]))
 
-(defonce next-id (atom 0))
-
-(defn new-id []
-  (swap! next-id inc))
-
-(defonce topic-data (rc/atom (sorted-map)))
+(defonce state (rc/atom {;; Key: (str path "-" instance-number)
+                         ;; Val: backing data for a topic module.
+                         :topics {}
+                         ;; Key: topic path. Value: number of topic mods for that path.
+                         ;; This is used to generate a unique key for the topic data.
+                         :paths-count {}}))
 
 (defn topicmod-add
-  [data]
-  (let [key (new-id)]
-    (swap! topic-data assoc key (assoc data :key key))))
+  [{:keys [path] :as data}]
+  (let [{:keys [paths-count topics]} @state
+        path-count (inc (paths-count path 0))
+        new-key (str path "#" path-count)
+        new-data (assoc data :key new-key :path-count path-count)]
+    (swap! state assoc
+           :topics (assoc topics new-key new-data)
+           :paths-count (assoc paths-count path path-count))))
 
 (defn topicmod-update
-  [{:keys [key] :as data}]
-  (swap! topic-data assoc key data))
+  [key data]
+  (let [topic-data (get-in @state [:topics key])]
+    (swap! state assoc-in [:topics key] (merge topic-data data))))
 
-(defn topicmod-partial-update
-  [{:keys [key] :as data}]
-  (swap!
-   topic-data
-   (fn [prev-data]
-     (assoc prev-data key (merge (prev-data key) data)))))
+(defn topicmod-delete
+  [& args])
 
 (defn topicmod-close
   [key]
-  (swap! topic-data dissoc key))
-
-(defn topicmod-delete
-  [key]
-  (js/alert (str "TODO: request delete of " key)))
+  (let [topics (dissoc (@state :topics) key)]
+    (swap! state assoc :topics topics)))
 
 (defn topicmod-save
-  [{:keys [key path meta sdoc]}]
+  [{:keys [key path meta sdoc html]}]
   (dom/request
    (dom/url (routes/topic-by-path path))
    {:method "PUT"
@@ -49,16 +48,17 @@
               js/JSON.stringify)}
    (fn [status result]
      (let [sdoc-errors (js->clj (gob/get result "sdoc-errors" #js []))]
-       (if (= 200 status)
-         (topicmod-update
-          {:key key
-           :path path
-           :sdoc-errors sdoc-errors
+       (topicmod-update
+        key
+        (if (= 200 status)
+          {:sdoc-errors sdoc-errors
            :meta (gob/get result "meta")
            :sdoc (gob/get result "sdoc")
-           :html (gob/get result "html")})
-         (topicmod-partial-update
-          {:key key :sdoc-errors sdoc-errors}))))))
+           :html (gob/get result "html")}
+          {:sdoc-errors sdoc-errors
+           :meta meta
+           :sdoc sdoc
+           :html html}))))))
 
 (defn error-detail
   [idx {:strs [level message line column]}]
@@ -69,89 +69,103 @@
    [:span.message message]])
 
 (defn topicmod
-  [{:keys [key path sdoc meta html sdoc-errors]}]
-  (let [atom-sdoc (rc/atom sdoc)
-        atom-meta (rc/atom meta)
-        save (fn [_]
-          (topicmod-save
-           {:key key
-            :path path
-            :meta @atom-meta
-            :sdoc @atom-sdoc}))]
-    ^{:key key}
-    [:div.topicmod
-     [:div.toolbar
-      [:div.name path]
-      [:button.save {:on-click save} "Save"]
+  [{:keys [key path path-count sdoc meta html sdoc-errors] :as payload}]
+  (fn []
+    (let [sdoc-key (str key "-sdoc")
+          meta-key (str key "-meta")
+          save
+          (fn []
+            (topicmod-save
+             (merge
+              payload
+              {:meta (codem/read meta-key)
+               :sdoc (codem/read sdoc-key)})))]
+      [:div.topicmod {:on-key-down
+                      (fn [ev]
+                        (when (and (= (.-key ev) "s") (.-ctrlKey ev))
+                          (.preventDefault ev)
+                          (save)))}
+       [:div.toolbar
+        [:div.name path]
+        [:button.save {:on-click save} "Save"]
 
-      [:button.delete
-       {:on-click
-        (fn [_] (topicmod-delete key))} "Delete"]
+        [:button.delete
+         {:on-click (fn [_] (topicmod-delete key))} "Delete"]
 
-      [:button.close
-       {:on-click
-        (fn [_] (topicmod-close key))} "Close"]]
-     [:div.content
-      [:div.meta
-       [:details {:open true}
-        [:summary "Meta"]
-        [:div.status]
-        [codem/code-mirror atom-meta {:opts {:mode "text/rdf"} :on-save save}]]]
-      [:div.topic
-       [:details {:open true}
-        [:summary "Source"]
-        [:div.status
-         (doall (map-indexed error-detail sdoc-errors))]
-        [codem/code-mirror atom-sdoc {:opts {:mode "text/xml"} :on-save save}]]]
-      [:div.preview
-       [:details {:open true}
-        [:summary "Preview"]
-        [:div.content (dom/danger html)]]]]]))
+        [:button.close
+         {:on-click (fn [_] (topicmod-close key))} "Close"]]
+       [:div.content
+        [:div.meta
+         [:details {:open true}
+          [:summary "Meta"]
+          [:div.status]
+          [codem/create meta-key meta {:mode "text/rdf"}]]]
+        [:div.topic
+         [:details {:open true}
+          [:summary "Source"]
+          [:div.status
+           (doall (map-indexed error-detail sdoc-errors))]
+          [codem/create sdoc-key sdoc {:mode "application/xml"}]]]
+        [:div.preview
+         [:details {:open true}
+          [:summary "Preview"]
+          [:div.content (dom/danger html)]]]]])))
+
+(defn render-topicmods
+  []
+  [:<> (doall (map (fn [val] ^{:key (:key val)} [(topicmod val)]) (vals (:topics @state))))])
+
+(defn render-topics
+  []
+  (rd/render
+   [render-topicmods]
+   (dom/query "#topics-container")))
 
 (defn toolbar-query
   []
-  (let [input (rc/atom nil)
+  (let [query (rc/atom "")]
+    (fn []
+      (let [get-valid-query
+            (fn []
+              (let [val @query]
+                (when (not (empty? val)))
+                (if (str/starts-with? val "/") val (str "/" val))))
 
-        get-valid-query
-        (fn []
-          (let [val (.-value @input)]
-            (if (and (.checkValidity @input) (not (empty? val)))
-              (if (str/starts-with? val "/") val (str "/" val)))))
+            attempt-open-topic
+            (fn []
+              (when-let [query (get-valid-query)]
+                (dom/request
+                 (dom/url (routes/topic-by-path query))
+                 {:method "GET" :headers {:Content-Type "application/json"}}
+                 (fn [status result]
+                   (if (= status 200)
+                     (topicmod-add
+                      {:path query
+                       :meta (gob/get result "meta")
+                       :sdoc (gob/get result "sdoc")
+                       :html (gob/get result "html")})
+                     (js/alert "Error connection to API"))))))]
 
-        attempt-open-topic
-        (fn []
-          (when-let [query (get-valid-query)]
-            (dom/request
-             (dom/url (routes/topic-by-path query))
-             {:method "GET" :headers {:Content-Type "application/json"}}
-             (fn [status result]
-               (if (= status 200)
-                 (topicmod-add
-                  {:path query
-                   :meta (gob/get result "meta")
-                   :sdoc (gob/get result "sdoc")
-                   :html (gob/get result "html")})
-                 (js/alert "Error connection to API"))))))]
-    [:<>
-     [:label {:for "topic-q"} "URL"]
-     [:input {:id "topic-q"
-              :type "text"
-              :ref #(reset! input %)
-              :pattern "[A-Za-z0-9\\/-]*"
-              :on-key-down #(when (= (.-which %) 13) (attempt-open-topic))}]
-     [:button.open-q {:on-click #(attempt-open-topic)} "Open"]]))
+        [:<>
+         [:label {:for "topic-q"} "URL"]
+         [:input {:id "topic-q"
+                  :type "text"
+                  :value @query
+                  :on-change (fn [ev] (reset! query (-> ev .-target .-value)))
+                  :pattern "[A-Za-z0-9\\/-]*"
+                  :on-key-down #(when (= (.-which %) 13) (attempt-open-topic))}]
+         [:button.open-q {:on-click #(attempt-open-topic)} "Open"]]))))
 
-(defn topicmods
+(defn render-toolbar
   []
-  [:<> (map topicmod (vals @topic-data))])
-
-(defn render-all []
-  (rd/render [topicmods] (dom/query "#topics-container"))
-  (rd/render toolbar-query (dom/query "#toolbar-query")))
+  (rd/render
+   [toolbar-query]
+   (dom/query "#toolbar-query")))
 
 (defn init
   []
-  (render-all))
+  (render-toolbar)
+  (render-topics))
 
 (defn ^:dev/before-load stop
   [])

@@ -112,7 +112,9 @@
                           (fn [text]
                             (callback
                              (.-status res)
-                             (try (js/JSON.parse text))))))))
+                             (try
+                               (js/JSON.parse text)
+                               (catch js/Error e #js {:errors "API Error"}))))))))
 
 (defn danger
   "This is react way to escape inserting inner html"
