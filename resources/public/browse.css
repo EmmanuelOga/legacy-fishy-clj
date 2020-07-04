@@ -119,6 +119,10 @@ label {
   overflow: auto;
 }
 
+.topicmod .content > div.topic {
+    flex: 4;
+}
+
 .topicmod .content textarea {
   width: 100%;
   height: 100%;

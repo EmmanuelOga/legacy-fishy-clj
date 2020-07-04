@@ -13,6 +13,15 @@
   [key]
   (.getValue (@instances key)))
 
+(defn focus
+  [key]
+  (js/setTimeout (fn []
+                   (js/console.log "fic")
+                   (.focus (@instances key))
+                   (-> (@instances key)
+                       (.getInputField)
+                       (.click)))) 500)
+
 (defn create
   [key val opts]
   (rc/create-class

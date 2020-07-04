@@ -22,20 +22,17 @@ sdoc-element-topic = element topic {
   # Succinct description.
   element description { sdoc-block-element } &
 
-  element header { sdoc-block-element * } ? &
-  element body { sdoc-block-element * } ? &
-  element footer { sdoc-block-element * } ? &
+  element header { sdoc-element-main-sections } ? &
 
-  element references {
-    attribute key { xs:NMTOKEN } &
-    attribute title { text } &
-    attribute glob { text } ? &
-    sdoc-element-collection-ref *
+  element body {
+    attribute title { text },
+    sdoc-element-main-sections
   } ? &
 
-  # Links to related resources, most likely external sites.  Themes
-  # will most likely use these for "see also" links to (mostly?)
-  # external sites.
+  element footer { sdoc-element-main-sections } ? &
+
+  sdoc-element-nav ? &
+
   element link {
     attribute rel { "cannonical" | "reference" | "alternate" } &
     attribute href { xs:anyURI } &
@@ -43,60 +40,61 @@ sdoc-element-topic = element topic {
   } *
 }
 
-# These are similar to inline refs but can have nested refs.
-sdoc-element-collection-ref = element ref {
+sdoc-element-main-sections = sdoc-block-element *
+
+# A ref normalizes the text of the label to find a reference to a
+# topic.  For instance: <ref>My Topic</ref> will be a reference to the
+# topic "/my-topic.topic", with label "My Topic". When the
+# topic and the label need to be different, the reference key can be
+# provided explicitely. For instance <ref key="spotted/racoon">Animal</ref>
+# refers to the topic "/spotted/racoon.topic" with label "Animal".
+sdoc-element-ref = element ref {
   attribute topic { text } ? &
-  attribute label { text } ? &
-  sdoc-element-collection-ref *
+  attribute class { text } ? &
+  text
 }
 
+# Allow finding refs by glob pattern.
+sdoc-element-refs = element refs {
+  attribute glob { text } &
+  attribute limit { xs:integer } ?
+}
+
+sdoc-element-nav = element nav {
+  attribute title { text } ? &
+  sdoc-element-ref * &
+  sdoc-element-refs * &
+  sdoc-element-nav *
+}
+                       
 sdoc-block-element =
+  sdoc-element-nav |
+  sdoc-element-ref |
   sdoc-block-p |
+  sdoc-block-section |
   sdoc-block-ul
 
 sdoc-inline-element = 
-  sdoc-inline-ref |
+  sdoc-element-nav |
+  sdoc-element-ref |
   sdoc-inline-a |
-  sdoc-inline-img |
-  sdoc-element-nav
+  sdoc-inline-img
 
 sdoc-block-p = element p {
-  attribute key { text } ?,
-  attribute title { text } ?,
   (text | sdoc-inline-element) *
 }
 
-sdoc-block-ul = element ul {
-  attribute title { text } ?,
-  sdoc-block-li *
+sdoc-block-section = element section {
+  attribute title { text } &
+  (text | sdoc-block-element | sdoc-inline-element) *
 }
 
-# A collection reference is a placeholder for a SDoc processor to
-# render a list of links to the elements of that collection.
-sdoc-element-nav = element nav {
-  attribute collection { xs:NMTOKEN } ? &
-  attribute include-date { xs:boolean } ? &
-  attribute all-topics { xs:boolean } ?
+sdoc-block-ul = element ul {
+  sdoc-block-li *
 }
 
 sdoc-block-li = element li {
   (text | sdoc-inline-element) *
-}
-
-# Produces a list of all known topics.
-sdoc-block-topics = element topics {
-  empty
-}
-
-# A ref normalizes the text of the label to find a reference to a
-# topic.  For instance: <ref>My Topic</ref> will be a reference to the
-# topic "/topics/my-topic.topic", with label "my topic". When the
-# topic and the label need to be different, the reference key can be
-# provided explicitely. For instance <ref key="spotted-racoon">animal</ref>
-# refers to the topic "/topics/spotted-racoon.topic".
-sdoc-inline-ref = element ref {
-  attribute topic { text } ?,
-  text
 }
 
 sdoc-inline-a = element a {
