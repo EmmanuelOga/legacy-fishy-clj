@@ -28,14 +28,39 @@
         </header>
 
         <main class="clear">
+          <xsl:if test="sd:body/@title" expand-text="yes">
+            <h2>{sd:body/@title}</h2>
+          </xsl:if>
           <xsl:apply-templates select="(sd:body, sd:description)[1]/*" />
         </main>
 
         <footer class="clear">
-          <xsl:apply-templates select="//sd:footer/*" />
+          <xsl:apply-templates select="sd:footer/*" />
         </footer>
-      </body>
+     </body>
     </html>
+  </xsl:template>
+
+  <xsl:template match="sd:ref" expand-text="yes">
+    <xsl:choose>
+      <xsl:when test="@class = 'logo'">
+        <h1><a href="{@topic | text()}">{text()}</a></h1>
+      </xsl:when>
+      <xsl:otherwise>
+        <a href="{@topic | text()}">{text()}</a>
+      </xsl:otherwise>
+    </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="sd:section">
+    <h3><xsl:value-of select="@title" /></h3>
+    <xsl:apply-templates select="*" />
+  </xsl:template>
+
+  <xsl:template match="sd:*">
+    <xsl:element name="{local-name()}">
+      <xsl:apply-templates select="@*, node()"/>
+    </xsl:element>
   </xsl:template>
 
 </xsl:stylesheet>

@@ -13,15 +13,6 @@
   [key]
   (.getValue (@instances key)))
 
-(defn focus
-  [key]
-  (js/setTimeout (fn []
-                   (js/console.log "fic")
-                   (.focus (@instances key))
-                   (-> (@instances key)
-                       (.getInputField)
-                       (.click)))) 500)
-
 (defn create
   [key val opts]
   (rc/create-class
@@ -50,5 +41,5 @@
       (swap! instances dissoc key))
 
     :reagent-render
-    (fn [_ _ _] [:div])}))
+    (fn [_ _ _] [:div.codem])}))
 

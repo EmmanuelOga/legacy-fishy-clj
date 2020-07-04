@@ -3,7 +3,7 @@ datatypes xs = "http://www.w3.org/2001/XMLSchema-datatypes"
 namespace sdoc = "https://eoga.dev/sdoc"
 default namespace = "https://eoga.dev/sdoc"
 
-# Helper to allow any markup in specific areas.
+# Allow any markup in specific areas.
 # For instance, could be used to embed SVG or other formats.
 any-markup = (text | element * - sdoc:* { attribute * { text }*, any-markup* })*
 

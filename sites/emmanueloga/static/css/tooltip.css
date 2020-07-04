@@ -1,0 +1,22 @@
+.tooltip {
+    min-height: 4rem;
+    padding: 0 1rem;
+    position: absolute;
+    visibility: hidden;
+    width: 32rem;
+    z-index: 10;
+    outline: 1px solid rgba(0, 0, 0, .25);
+}
+
+.tooltip.visible {
+    visibility: visible;
+}
+
+.tooltip-content {
+    display: inline-flex;
+}
+
+.tooltip-content img {
+    padding: 1rem;
+    max-width: 25%;
+}

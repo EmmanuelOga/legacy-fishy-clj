@@ -1,20 +1,47 @@
 :root {
-  --color-bg: rgba(240, 240, 212, 1);
-  --color-fg: black;
+  --text-color: rgba(0, 0, 64);
+  --text-color-bright: rgba(0, 0, 128);
+  --text-color-dim: rgba(0, 0, 72);
 }
 
 * {
   box-sizing: border-box;
 }
 
+a {
+  color: var(--color-bright);
+}
+
+a:visited {
+  color: var(--color-dim);
+}
+
+html {
+  font-size: 16px;
+}
+
 body {
-  font-family: Segoe UI, Sitka Text, serif;
+  font-family: "Segoe UI", serif;
+  font-size: 1.25rem;
   line-height: 1.5;
 
-  color: var(--color-fg);
-  background-color: var(--color-bg);
+  color: var(--text-color);
 
   margin: 0;
   padding: 0;
+
+  background-color: var(--color-bg1);
 }
 
+footer {
+  border-top: 1px solid rgba(0, 0, 0, .25);
+  font-size: .75rem;
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.clear:after {
+  content: "";
+  display: table;
+  clear: both;
+}

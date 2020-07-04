@@ -119,23 +119,12 @@ label {
   overflow: auto;
 }
 
-.topicmod .content > div.topic {
-    flex: 4;
-}
-
-.topicmod .content textarea {
-  width: 100%;
-  height: 100%;
+.topicmod .content .codem {
   margin-top: .5rem;
-  resize: vertical;
 }
 
-.topicmod .content .meta textarea {
-  min-height: 10rem;
-}
-
-.topicmod .content .topic textarea {
-  min-height: 10rem;
+.topicmod .content .codem > * {
+    height: 100%;
 }
 
 .topicmod .content .preview {
