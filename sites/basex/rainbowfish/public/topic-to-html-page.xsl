@@ -11,6 +11,14 @@
   exclude-result-prefixes="#all">
   <xsl:output indent="yes" method="xhtml" />
 
+  <!-- ******************************************************************************** -->
+
+  <xsl:param name="xmldb" as="xs:string" />
+
+  <xsl:variable name="root" type="xsl:sequence" select="doc('basex://' || $xmldb || '/index')" />
+
+  <!-- ******************************************************************************** -->
+
   <xsl:mode on-no-match="shallow-copy"/><!-- Identity transform! -->
 
   <xsl:template match="sd:topic">
@@ -24,7 +32,7 @@
 
       <body>
         <header class="clear">
-          <xsl:apply-templates select="sd:header/*" />
+          <xsl:apply-templates select="(sd:header, $root//sd:header)[1]/*" />
         </header>
 
         <main class="clear">
@@ -35,25 +43,19 @@
         </main>
 
         <footer class="clear">
-          <xsl:apply-templates select="sd:footer/*" />
+          <xsl:apply-templates select="(sd:footer, $root//sd:footer)[1]/*" />
         </footer>
-
-        Example: comoga/about
-        <xsl:copy-of select="doc('basex://comoga/about')" />
-
-        Example: devoga/index
-        <xsl:copy-of select="doc('basex://comoga/index')" />
      </body>
     </html>
   </xsl:template>
 
   <xsl:template match="sd:ref" expand-text="yes">
     <xsl:choose>
-      <xsl:when test="@class = 'logo'">
-        <h1><a href="{@topic | text()}">{text()}</a></h1>
+      <xsl:when test="@class='logo'">
+        <h1><a href="{fn:lower-case((@topic, text())[1])}">{text()}</a></h1>
       </xsl:when>
       <xsl:otherwise>
-        <a href="{@topic | text()}">{text()}</a>
+        <a href="{fn:lower-case((@topic, text())[1])}">{text()}</a>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>

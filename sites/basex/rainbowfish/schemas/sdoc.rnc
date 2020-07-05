@@ -15,10 +15,6 @@ sdoc-element-topic = element topic {
 
   element title { text } &
 
-  # Labels are the default label to use when linking to a topic.
-  # If label is missing, the label should default to the title text.
-  element label { text } ? &
-
   # Succinct description.
   element description { sdoc-block-element } &
 
@@ -49,8 +45,8 @@ sdoc-element-main-sections = sdoc-block-element *
 # provided explicitely. For instance <ref key="spotted/racoon">Animal</ref>
 # refers to the topic "/spotted/racoon.topic" with label "Animal".
 sdoc-element-ref = element ref {
-  attribute topic { text } ? &
   attribute class { text } ? &
+  attribute topic { text } ? &
   text
 }
 
