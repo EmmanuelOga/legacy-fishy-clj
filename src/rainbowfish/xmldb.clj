@@ -1,8 +1,8 @@
 (ns rainbowfish.xmldb
   (:require [clojure.string :as str]
+            [jsonista.core :as j]
             [rainbowfish.config :as config]
-            [rainbowfish.file-util :as fu]
-            [jsonista.core :as j])
+            [rainbowfish.file-util :as fu])
   (:import [org.basex BaseXGUI BaseXServer]
            org.basex.api.client.ClientSession
            [org.basex.core.cmd Add Replace]))
@@ -28,8 +28,8 @@
 (defn create-session
   "Creates a network session to talk to BaseX server"
   []
-  (let [o (options)]
-    (ClientSession. (:host o) (:port o) (:user o) (:password o))))
+  (let [{:keys [host port user password]} (options)]
+    (ClientSession. host port user password)))
 
 (defn open
   "Opens a BaseX session and calls the callback with it"
@@ -89,11 +89,11 @@
 
 (defn add-doc
   [xmldb path doc]
-  (fire-cmd xmldb path  (Add. path doc)))
+  (fire-cmd xmldb path (Add. path doc)))
 
 (defn replace-doc
   [xmldb path doc]
-  (fire-cmd xmldb path  (Replace. path doc)))
+  (fire-cmd xmldb path (Replace. path doc)))
 
 (defn extract-parts
   [basex-resp]

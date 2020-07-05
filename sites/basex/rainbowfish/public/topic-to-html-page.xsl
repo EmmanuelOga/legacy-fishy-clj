@@ -37,6 +37,12 @@
         <footer class="clear">
           <xsl:apply-templates select="sd:footer/*" />
         </footer>
+
+        Example: comoga/about
+        <xsl:copy-of select="doc('basex://comoga/about')" />
+
+        Example: devoga/index
+        <xsl:copy-of select="doc('basex://comoga/index')" />
      </body>
     </html>
   </xsl:template>

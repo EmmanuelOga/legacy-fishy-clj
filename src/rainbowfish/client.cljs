@@ -99,7 +99,7 @@
          [:details {:open true}
           [:summary "Meta"]
           [:div.status]
-          [codem/create meta-key meta {:mode "text/rdf"}]]]
+          [codem/create meta-key meta {:mode "text/turtle"}]]]
         [:div.topic
          [:details {:open true}
           [:summary "Source"]
