@@ -41,7 +41,7 @@
      {:sdoc sdoc :meta meta :xmldb xmldb :opmeta opmeta})
     (if valid
       (do
-        (xmldb/replace-doc xmldb (str "/" topic) sdoc)
+        (xmldb/replace-doc xmldb (str "/" topic ".topic") sdoc)
         (topic-get-or-default topic data))
       raw-validation)))
 

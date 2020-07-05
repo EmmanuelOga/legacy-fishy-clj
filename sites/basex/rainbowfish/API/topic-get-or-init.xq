@@ -30,6 +30,6 @@ return (
   json:serialize(map {
     'meta': file:read-text($basepath || "/API/default.ttl"),
     'sdoc': serialize($in),
-    'html': $html
+            'html': $html
   }, $json-options)
 )

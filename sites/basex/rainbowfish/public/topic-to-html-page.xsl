@@ -52,10 +52,10 @@
   <xsl:template match="sd:ref" expand-text="yes">
     <xsl:choose>
       <xsl:when test="@class='logo'">
-        <h1><a href="{fn:lower-case((@topic, text())[1])}">{text()}</a></h1>
+        <h1><a href="/{fn:lower-case((@topic, text())[1])}">{text()}</a></h1>
       </xsl:when>
       <xsl:otherwise>
-        <a href="{fn:lower-case((@topic, text())[1])}">{text()}</a>
+        <a href="/{fn:lower-case((@topic, text())[1])}">{text()}</a>
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>

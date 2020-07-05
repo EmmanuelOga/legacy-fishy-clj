@@ -12,13 +12,6 @@
            javax.xml.transform.Source
            org.xml.sax.InputSource))
 
-(defn ^Source -resolve
-  "Override `resolve` to handle `basex://` URIs"
-  [this ^String href ^String base]
-  (if (str/starts-with? href "basex://")
-    (resolve-basex href base)
-    (.resolveSuper this href base)))
-
 (defn resolve-basex
   "Attempt to open a document from BaseX. href should contain a url like
   `basex://db-name/db-path`. `base` will typically be the .xq file
@@ -40,3 +33,9 @@
     (doto (SAXSource. is)
       (.setSystemId href))))
 
+(defn ^Source -resolve
+  "Override `resolve` to handle `basex://` URIs"
+  [this ^String href ^String base]
+  (if (str/starts-with? href "basex://")
+    (resolve-basex href base)
+    (.resolveSuper this href base)))
