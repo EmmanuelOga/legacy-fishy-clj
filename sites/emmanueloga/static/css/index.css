@@ -2,10 +2,18 @@
   --text-color: rgba(0, 0, 64);
   --text-color-bright: rgba(0, 0, 128);
   --text-color-dim: rgba(0, 0, 72);
+  --banner-height: 6rem;
+  --padding-content: 0 1rem;
 }
 
 * {
   box-sizing: border-box;
+}
+
+.clear:after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
 a {
@@ -20,6 +28,8 @@ html {
   font-size: 16px;
 }
 
+/*******************************************************************************/
+
 body {
   font-family: "Segoe UI", serif;
   font-size: 1.25rem;
@@ -31,17 +41,65 @@ body {
   padding: 0;
 
   background-color: var(--color-bg1);
+  display: flex;
+  flex-direction: column;
 }
 
-footer {
-  border-top: 1px solid rgba(0, 0, 0, .25);
+.top-banner {
+  position: absolute;
+  height: var(--banner-height);
+  top: 0; left: 0; right: 0;
+  background-color: black;
+  z-index: -1;
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  z-index: 1;
+}
+
+.main-footer {
   font-size: .75rem;
-  margin-top: 2rem;
   text-align: center;
+  background-color: black;
+  color: white;
 }
 
-.clear:after {
-  content: "";
-  display: table;
-  clear: both;
+/*******************************************************************************/
+
+.main-header {
+  display: flex;
+  align-items: baseline;
+  background-color: black;
+  color: white;
+  height: var(--banner-height);
+  padding: var(--padding-content);
 }
+
+.main-header a {
+  text-decoration: none;
+}
+
+.main-header a:hover {
+  text-decoration: underline;
+}
+
+.main-header h1 {
+  flex: 1;
+}
+
+.main-header nav {
+  padding: 0 2rem;
+}
+
+.main-header nav a {
+  padding: 1rem;
+}
+
+.main-body {
+  padding: var(--padding-content);
+}
+

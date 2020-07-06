@@ -15,7 +15,7 @@
 
   <xsl:param name="xmldb" as="xs:string" />
 
-  <xsl:variable name="root" type="xsl:sequence" select="doc('basex://' || $xmldb || '/index')" />
+  <xsl:variable name="root" type="xsl:sequence" select="doc('basex://' || $xmldb || '/index.topic')" />
 
   <!-- ******************************************************************************** -->
 
@@ -31,18 +31,21 @@
       </head>
 
       <body>
-        <header class="clear">
-          <xsl:apply-templates select="(sd:header, $root//sd:header)[1]/*" />
-        </header>
+        <div class="top-banner"></div>
+        <div class="main-content">
+          <header class="main-header clear">
+            <xsl:apply-templates select="(sd:header, $root//sd:header)[1]/*" />
+          </header>
 
-        <main class="clear">
-          <xsl:if test="sd:body/@title" expand-text="yes">
-            <h2>{sd:body/@title}</h2>
-          </xsl:if>
-          <xsl:apply-templates select="(sd:body, sd:description)[1]/*" />
-        </main>
-
-        <footer class="clear">
+          <main class="main-body clear">
+            <xsl:if test="sd:body/@title" expand-text="yes">
+              <h2>{sd:body/@title}</h2>
+            </xsl:if>
+            <xsl:apply-templates select="(sd:body, sd:description)[1]/*" />
+          </main>
+        </div>
+  
+        <footer class="main-footer clear">
           <xsl:apply-templates select="(sd:footer, $root//sd:footer)[1]/*" />
         </footer>
      </body>
@@ -58,6 +61,17 @@
         <a href="/{fn:lower-case((@topic, text())[1])}">{text()}</a>
       </xsl:otherwise>
     </xsl:choose>
+  </xsl:template>
+
+  <xsl:template match="sd:refs" expand-text="yes">
+    <xsl:variable name="entries"
+                  select="doc('basex://' || $xmldb || '/' || @prefix || '?list-topics=true&amp;limit=3')" />
+    <xsl:for-each select="$entries//entry">
+      <a class="topic-ref" href="{fn:replace(./@path, '.topic$', '')}">
+        <span class="date">{./@date}</span>
+        <span class="title">{./@title}</span>
+      </a>
+    </xsl:for-each>
   </xsl:template>
 
   <xsl:template match="sd:section">

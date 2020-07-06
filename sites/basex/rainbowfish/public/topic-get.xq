@@ -8,7 +8,7 @@ declare variable $topic as xs:string external;
 declare variable $content-type as xs:string external;
 
 declare option output:method 'html';
-    declare option output:html-version '5.0';
+declare option output:html-version '5.0';
 
 let $json-options := map { 'format' : 'xquery', 'indent' : 'no' }
 return
@@ -16,7 +16,9 @@ return
   then
     let $in := db:open($xmldb)[db:path(.)=$topic][1]
     let $out := if ($content-type = "text/html")
-                then xslt:transform($in, $basepath || "/public/topic-to-html-page.xsl" ,  map { 'xmldb' : $xmldb })
+                then xslt:transform($in,
+                                    $basepath || "/public/topic-to-html-page.xsl",
+                                    map { 'xmldb' : $xmldb })
                 else $in
     return (
             json:serialize(map {'code' : 200}, $json-options),

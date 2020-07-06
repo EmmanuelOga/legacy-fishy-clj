@@ -52,8 +52,7 @@ sdoc-element-ref = element ref {
 
 # Allow finding refs by glob pattern.
 sdoc-element-refs = element refs {
-  attribute glob { text } &
-  attribute limit { xs:integer } ?
+  attribute prefix { text }
 }
 
 sdoc-element-nav = element nav {
