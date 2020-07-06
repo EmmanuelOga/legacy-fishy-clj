@@ -31,9 +31,11 @@
     (swap! state assoc-in [:topics key] (merge topic-data data))))
 
 (defn topicmod-close
-  [{:keys [key]}]
-  (let [topics (dissoc (@state :topics) key)]
-    (swap! state assoc :topics topics)))
+  [{:keys [key path]}]
+  (let [{:keys [topics paths-count]} @state
+        new-topics (dissoc topics key)
+        new-counts (update paths-count path dec)]
+    (swap! state assoc :topics new-topics :paths-count new-counts)))
 
 (defn topicmod-delete
   [{:keys [key path] :as data}]
@@ -94,7 +96,7 @@
                           (.preventDefault ev)
                           (save)))}
        [:div.toolbar
-        [:div.name path]
+        [:div.name path (if (> path-count 1) (str " #" path-count))]
         [:button.save {:on-click save} "Save"]
 
         [:button.delete

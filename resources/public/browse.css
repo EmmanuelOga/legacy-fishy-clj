@@ -19,14 +19,12 @@
   padding: .5rem;
 }
 
-html, body, #main {
+html, body {
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
-}
-
-body {
   font-family: Segoe UI;
 }
 
@@ -34,31 +32,27 @@ label {
   font-weight: bold;
 }
 
-#main {
+body {
   display: flex;
   flex-direction: column;
 }
 
-#main > header,
-#main > main {
-  padding: .5rem;
-}
-      
-#main > header {
+#browse-toolbar {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+
+  padding: .5rem 1.25rem 0;
 
   background-color: greenyellow;
   border-bottom: 1px solid rgba(0, 0, 0, .125);
 }
 
-#main > main {
+#topics-container {
   flex: 1;
-  height: 0; /* Limits the growth of the container. */
-
   display: flex;
   flex-direction: row;
+  overflow-x: auto;
 }
 
 .topicmod {
@@ -93,8 +87,8 @@ label {
 }
 
 .topicmod .toolbar .name {
-    font-weight: bold;
-    flex: 1;
+  font-weight: bold;
+  flex: 1;
 }
 
 .topicmod .content {
@@ -124,7 +118,7 @@ label {
 }
 
 .topicmod .content .codem > * {
-    height: 100%;
+  height: 100%;
 }
 
 .topicmod .content .preview {
@@ -134,46 +128,46 @@ label {
 }
 
 .topicmod .content .preview details {
-    height: 100%;
-    width: 100%;
+  height: 100%;
+  width: 100%;
 
-    position: relative;
+  position: relative;
 }
 
 .topicmod .content .preview details div.content {
-    position: absolute;
+  position: absolute;
 
-    margin: .25rem;
-    padding: .25rem;
+  margin: .25rem;
+  padding: .25rem;
     
-    top: 2rem;
-    left: 0;
-    right: 0;
-    bottom: 0;
+  top: 2rem;
+  left: 0;
+  right: 0;
+  bottom: 0;
 
-    background-color: white;
-    outline: 1px solid rgba(0, 0, 0, .125);
-    outline-offset: 2px;
+  background-color: white;
+  outline: 1px solid rgba(0, 0, 0, .125);
+  outline-offset: 2px;
 }
 
 .topicmod .error {
-    padding: .25rem 0;
-    margin: .25rem 0;
-    border-bottom: 2px dotted lightgray;
+  padding: .25rem 0;
+  margin: .25rem 0;
+  border-bottom: 2px dotted lightgray;
 }
 
 .topicmod .line,
 .topicmod .column {
-    font-size: .75rem;
-    display: inline-block;
-    padding: .125rem .25rem;
-    margin-right: .5rem;
-    background-color: greenyellow;
-    border-radius: .5rem;
+  font-size: .75rem;
+  display: inline-block;
+  padding: .125rem .25rem;
+  margin-right: .5rem;
+  background-color: greenyellow;
+  border-radius: .5rem;
 }
 
 .topicmod .message {
-    font-style: italic;
+  font-style: italic;
 }
 
 #topic-q {

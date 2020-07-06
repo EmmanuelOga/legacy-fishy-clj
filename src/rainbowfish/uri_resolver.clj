@@ -41,7 +41,7 @@
                "declare variable $db external;
                 declare variable $path external;
                 db:open($db, $path)"
-               [["$db" uri-host] ["$path" uri-path]]))
+               [["$db" uri-host] ["$path" uri-path] ["$limit" limit]]))
         bais (ByteArrayInputStream. (.getBytes src "UTF-8"))
         is (InputSource. bais)]
     (doto (SAXSource. is)
