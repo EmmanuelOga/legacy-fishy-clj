@@ -52,11 +52,13 @@ sdoc-element-ref = element ref {
 
 # Allow finding refs by glob pattern.
 sdoc-element-refs = element refs {
-  attribute prefix { text }
+  attribute prefix { text } &
+  attribute hide-dates { xs:boolean } ?
 }
 
 sdoc-element-nav = element nav {
   attribute title { text } ? &
+  attribute class { text } ? &
   sdoc-element-ref * &
   sdoc-element-refs * &
   sdoc-element-nav *

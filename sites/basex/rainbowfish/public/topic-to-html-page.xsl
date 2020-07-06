@@ -65,10 +65,15 @@
 
   <xsl:template match="sd:refs" expand-text="yes">
     <xsl:variable name="entries"
-                  select="doc('basex://' || $xmldb || '/' || @prefix || '?list-topics=true&amp;limit=3')" />
+                  select="doc('basex://' || $xmldb || '/' || @prefix ||
+                              '?list-topics=true&amp;limit=' || xs:string((@limit, 0)))" />
+    <xsl:variable name="show-dates" select="not(@hide-dates)" />
+
     <xsl:for-each select="$entries//entry">
       <a class="topic-ref" href="{fn:replace(./@path, '.topic$', '')}">
-        <span class="date">{./@date}</span>
+        <xsl:if test="$show-dates">
+          <span class="date">{./@date}</span>
+        </xsl:if>
         <span class="title">{./@title}</span>
       </a>
     </xsl:for-each>

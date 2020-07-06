@@ -10,23 +10,17 @@ declare variable $content-type as xs:string external;
 declare option output:method 'html';
 declare option output:html-version '5.0';
 
+let $in := (db:open($xmldb)[db:path(.)=$topic], db:open($xmldb, '404.topic'))[1]
 let $json-options := map { 'format' : 'xquery', 'indent' : 'no' }
 return
-  if (db:exists($xmldb, $topic))
-  then
-    let $in := db:open($xmldb)[db:path(.)=$topic][1]
+  if ($in) then
+    let $xsl := $basepath || "/public/topic-to-html-page.xsl"
     let $out := if ($content-type = "text/html")
-                then xslt:transform($in,
-                                    $basepath || "/public/topic-to-html-page.xsl",
-                                    map { 'xmldb' : $xmldb })
+                then xslt:transform($in, $xsl, map { 'xmldb' : $xmldb })
                 else $in
-    return (
-            json:serialize(map {'code' : 200}, $json-options),
+    return (json:serialize(map {'code' : 200}, $json-options),
             "===BOUNDARY===",
-            $out
-           )
-  else (
-        json:serialize(map {'code' : 404}, $json-options),
+            $out)
+  else (json:serialize(map {'code' : 404}, $json-options),
         "===BOUNDARY===",
-        "Resource not found"
-       )
+        "<error code='404'>Resource not found</error>")
