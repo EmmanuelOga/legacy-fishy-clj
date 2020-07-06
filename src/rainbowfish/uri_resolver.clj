@@ -6,7 +6,8 @@
    :extends net.sf.saxon.lib.StandardURIResolver
    :exposes-methods {resolve resolveSuper})
   (:require [clojure.string :as str]
-            [rainbowfish.xmldb :as xmldb])
+            [rainbowfish.xmldb :as xmldb]
+            [ring.util.codec :as c])
   (:import java.io.ByteArrayInputStream
            javax.xml.transform.sax.SAXSource
            javax.xml.transform.Source
@@ -19,15 +20,28 @@
   method (url should always include db name and be absolute)."
   [href base]
   (let [uri (java.net.URI. href)
+        uri-host (.getHost uri)
+        uri-path (.getPath uri)
+        uri-query (.getQuery uri)
         ;; Peform a BaseX query to retrieve the doc.  Unfortunatelly
         ;; this opens an additional network request but should be ok
         ;; for now.
-        src (xmldb/query
-             "declare variable $db external;
-              declare variable $path external;
-              db:open($db, $path)"
-             [["$db" (.getHost uri)]
-              ["$path" (.getPath uri)]])
+        query (and uri-query (c/form-decode uri-query))
+        list-filter (and (map? query) (query "list-topics"))
+        limit (or (and (map? query) (query "limit")) "")
+        src (if (= list-filter "true")
+              (xmldb/run-script
+               (xmldb/rf-path "API/topic-list.xq")
+               {:basepath (xmldb/rf-path ".")
+                :xmldb uri-host
+                :path uri-path
+                :limit limit})
+              ;; Return a single topic.
+              (xmldb/query
+               "declare variable $db external;
+                declare variable $path external;
+                db:open($db, $path)"
+               [["$db" uri-host] ["$path" uri-path]]))
         bais (ByteArrayInputStream. (.getBytes src "UTF-8"))
         is (InputSource. bais)]
     (doto (SAXSource. is)

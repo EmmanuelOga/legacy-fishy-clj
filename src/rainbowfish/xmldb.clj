@@ -5,7 +5,7 @@
             [rainbowfish.file-util :as fu])
   (:import [org.basex BaseXGUI BaseXServer]
            org.basex.api.client.ClientSession
-           [org.basex.core.cmd Add Replace]))
+           [org.basex.core.cmd Add Replace Delete]))
 
 (defn ^:dynamic options
   "BaseX Database Options"
@@ -81,19 +81,27 @@
               (exec sess (str "SET BINDINGS " bindings)))
             (exec sess (str "RUN " path))))))
 
-(defn fire-cmd
-  [xmldb path cmd]
-  (open (fn [sess]
-          (.execute sess (str "OPEN " xmldb))
-          (.execute sess cmd))))
+(defn delete-doc
+  [xmldb path]
+  (fire
+   (str "OPEN " xmldb)
+   (Delete. path)))
 
 (defn add-doc
   [xmldb path doc]
-  (fire-cmd xmldb path (Add. path doc)))
+  (fire
+   (str "OPEN " xmldb)
+   "SET CHOP false"
+   "SET SERIALIZER indent=no"
+   (Add. path doc)))
 
 (defn replace-doc
   [xmldb path doc]
-  (fire-cmd xmldb path (Replace. path doc)))
+  (fire
+   (str "OPEN " xmldb)
+   "SET CHOP false"
+   "SET SERIALIZER indent=no"
+   (Replace. path doc)))
 
 (defn extract-parts
   [basex-resp]

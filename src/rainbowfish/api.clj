@@ -36,14 +36,19 @@
                          :basepath (xmldb/rf-path ".")
                          :topic-string sdoc})
         [{:strs [valid] :as opmeta}] (xmldb/extract-parts raw-validation)]
-    (log/info
-     "TOPIC REPLACE"
-     {:sdoc sdoc :meta meta :xmldb xmldb :opmeta opmeta})
     (if valid
       (do
-        (xmldb/replace-doc xmldb (str "/" topic ".topic") sdoc)
+        (xmldb/replace-doc xmldb topic sdoc)
         (topic-get-or-default topic data))
       raw-validation)))
+
+(defn topic-delete
+  [topic
+   {{:keys [xmldb]} :host-config :as data}]
+  (xmldb/delete-doc xmldb topic)
+  (->
+   (resp/response (j/write-value-as-string {:result (str "Deleted " topic)}))
+   (resp/content-type "application/json")))
 
 (defn interpret-result
   [basex-response]
@@ -60,7 +65,8 @@
     {:keys [request-method body]} :req
     {:keys [path-params]} :match
     {:keys [xmldb]} :host-config :as data}]
-  (let [[topic _] (fu/path-to-topic (:key path-params))]
+  (let [[basename ext] (fu/path-to-topic (:key path-params) "topic")
+        topic (str basename "." ext)]
     (case request-method
       :get
       (->
@@ -68,9 +74,7 @@
        (interpret-result))
 
       :delete
-      (-> "<delete/>"
-          (resp/response)
-          (resp/content-type "application/xml"))
+      (topic-delete topic data)
 
       :put
       (let [encoding (or (request/character-encoding req) "UTF-8")
@@ -80,5 +84,5 @@
          (interpret-result)))
 
       (-> (resp/bad-request
-           (str "<error>Unknown request: " request-method "</error>"))
-          (resp/content-type "application/xml")))))
+           (str "{ \"error\" : \"Unknown request" request-method "\" }"))
+          (resp/content-type "application/json")))))

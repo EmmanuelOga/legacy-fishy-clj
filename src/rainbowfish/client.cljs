@@ -30,13 +30,21 @@
   (let [topic-data (get-in @state [:topics key])]
     (swap! state assoc-in [:topics key] (merge topic-data data))))
 
-(defn topicmod-delete
-  [& args])
-
 (defn topicmod-close
-  [key]
+  [{:keys [key]}]
   (let [topics (dissoc (@state :topics) key)]
     (swap! state assoc :topics topics)))
+
+(defn topicmod-delete
+  [{:keys [key path] :as data}]
+  (dom/request
+   (dom/url (routes/topic-by-path path))
+   {:method "DELETE" :headers {:Content-Type "application/json"}}
+   (fn [status result]
+     (js/console.log status result)
+     (if (= status 200)
+       (topicmod-close data)
+       (js/alert "Error connection to API")))))
 
 (defn topicmod-save
   [{:keys [key path meta sdoc html]}]
@@ -90,10 +98,11 @@
         [:button.save {:on-click save} "Save"]
 
         [:button.delete
-         {:on-click (fn [_] (topicmod-delete key))} "Delete"]
+         {:on-click (fn [_] (topicmod-delete payload))} "Delete"]
 
         [:button.close
-         {:on-click (fn [_] (topicmod-close key))} "Close"]]
+         {:on-click (fn [_] (topicmod-close payload))} "Close"]]
+
        [:div.content
         [:div.meta
          [:details {:open true}
@@ -113,7 +122,8 @@
 
 (defn render-topicmods
   []
-  [:<> (doall (map (fn [val] ^{:key (:key val)} [(topicmod val)]) (vals (:topics @state))))])
+  [:<> (doall
+        (map (fn [val] ^{:key (:key val)} [(topicmod val)]) (reverse (vals (:topics @state)))))])
 
 (defn render-topics
   []

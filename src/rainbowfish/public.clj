@@ -25,11 +25,18 @@
 (defn handle-topic
   [{:keys [req] {:keys [xmldb]} :host-config :as data}]
   (if (= :get (:request-method req))
-    (let [[topic format] (fu/path-to-topic (req/path-info req))]
-      (when-let [[provider content-type] (get-provider format)]
-        (let [result (provider topic content-type data)
-              [{:strs [code] :as opmeta} payload] (xmldb/extract-parts result)]
-          (log/info "public: GET topic" {:xmldb xmldb :opmeta opmeta})
+    (let [[basename ext] (fu/path-to-topic (req/path-info req) "html")
+          topic (str basename ".topic")]
+
+      (when-let [[provider content-type] (get-provider ext)]
+        (let [result
+              (provider topic content-type data)
+
+              [{:strs [code] :as opmeta} payload]
+              (xmldb/extract-parts result)]
+
+        (log/info "public: GET topic" :basename basename :ext ext :topic topic :result result)
+
           (->
            (resp/response payload)
            (resp/content-type content-type)))))))

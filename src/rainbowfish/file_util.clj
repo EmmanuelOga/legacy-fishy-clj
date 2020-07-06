@@ -73,9 +73,9 @@
 
 (defn path-to-topic
   "Converts a request path to a [topic-name extension] tuple."
-  [path]
+  [path extension]
   (let [[base name ext] (get-base-name-and-ext path)]
     [(remove-base-slash
-      (str (or base "") "/" (or name "index")))
-     (or ext "html")]))
+      (str base "/" (or name "index")))
+     (or ext extension)]))
 
