@@ -28,6 +28,10 @@
   org.relaxng/jing {:mvn/version "20181222"}
   org.basex/basex {:mvn/version "9.3.3"}
 
+  ; Jena
+  org.apache.jena/jena {:mvn/version "3.15.0" :extension "pom"}
+  org.apache.jena/jena-fuseki {:mvn/version "3.15.0" :extension "pom"}
+
   ; To generate an uberjar
   uberdeps {:mvn/version "0.1.10"}
   }}

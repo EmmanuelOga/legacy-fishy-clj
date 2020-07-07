@@ -15,6 +15,9 @@ sdoc-element-topic = element topic {
 
   element title { text } &
 
+  # Main image for a topic, if any.
+  sdoc-element-img ? &
+
   # Succinct description.
   element description { sdoc-block-element } &
 
@@ -75,7 +78,7 @@ sdoc-inline-element =
   sdoc-element-nav |
   sdoc-element-ref |
   sdoc-inline-a |
-  sdoc-inline-img
+  sdoc-element-img
 
 sdoc-block-p = element p {
   (text | sdoc-inline-element) *
@@ -100,7 +103,7 @@ sdoc-inline-a = element a {
   (text | sdoc-inline-element) *
 }
 
-sdoc-inline-img = element img {
+sdoc-element-img = element img {
   attribute src { xs:anyURI } &
   attribute style { text } ? &
   attribute alt { text } ?
