@@ -1,5 +1,5 @@
 {:paths
- ["src" "test" "classes" "resources"]
+ ["src" "test" "classes" "resources" "java"]
 
  :mvn/repos
  {"basex" {:url "http://files.basex.org/maven"}}
@@ -17,6 +17,8 @@
   metosin/reitit {:mvn/version "0.5.2"}
   metosin/jsonista {:mvn/version "0.2.6"}
   expound {:mvn/version "0.8.4"}
+  virgil {:mvn/version "0.1.9" :exclusions [org.ow2.asm/asm] }
+  org.ow2.asm/asm {:mvn/version "8.0.1"}
 
   ; Logging
   spootnik/unilog {:mvn/version "0.7.24"}
@@ -29,8 +31,15 @@
   org.basex/basex {:mvn/version "9.3.3"}
 
   ; Jena
-  org.apache.jena/jena {:mvn/version "3.15.0" :extension "pom"}
-  org.apache.jena/jena-fuseki {:mvn/version "3.15.0" :extension "pom"}
+  ; org.apache.jena/apache-jena {:mvn/version "3.15.0" :extension "pom"}
+  ; org.apache.jena/apache-jena-libs {:mvn/version "3.15.0" :extension "pom"}
+  ; org.apache.jena/apache-jena-fuseki {:mvn/version "3.15.0" :extension "pom"}
+  ; org.apache.jena/jena-fuseki {:mvn/version "3.15.0" :extension "pom"}
+  ; org.apache.jena/jena-fuseki-access {:mvn/version "3.15.0" }
+  ; org.apache.jena/jena-fuseki-core {:mvn/version "3.15.0" }
+  ; org.apache.jena/jena-fuseki-fulljar {:mvn/version "3.15.0" }
+  org.apache.jena/jena-fuseki-main {:mvn/version "3.15.0" }
+  ; org.apache.jena/jena-fuseki-server {:mvn/version "3.15.0" }
 
   ; To generate an uberjar
   uberdeps {:mvn/version "0.1.10"}

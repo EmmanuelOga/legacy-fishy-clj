@@ -17,6 +17,5 @@
   (swap! server
          (fn [old-server]
            (let [options (assoc (:backend (config/config)) :join? false)]
-             (println options)
              (when old-server (.stop old-server))
              (run-jetty (http/app) options)))))
