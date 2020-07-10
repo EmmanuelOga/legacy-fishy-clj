@@ -5,7 +5,8 @@
             [rainbowfish.file-util :as fu]
             [rainbowfish.xmldb :as xmldb]
             [ring.util.request :as request]
-            [ring.util.response :as resp]))
+            [ring.util.response :as resp]
+            [rainbowfish.jena :as jena]))
 
 (defn topic-complete
   [topic
@@ -17,17 +18,20 @@
       (resp/content-type "application/xml")))
 
 (defn topic-get-or-default
-  [topic {{:keys [xmldb]} :host-config}]
-  (xmldb/run-script
-   (xmldb/rf-path "API/topic-get-or-init.xq")
-   {:basepath (xmldb/rf-path ".")
-    :xmldb xmldb
-    :topic topic}))
+  [topic {:keys [named-graph] {:keys [xmldb]} :host-config}]
+  (let [fetch-model (rainbowfish.JenaClient/fetch named-graph)
+        json-ld (jena/write (or fetch-model (jena/create-empty-model)) "TURTLE")]
+    (xmldb/run-script
+     (xmldb/rf-path "API/topic-get-or-init.xq")
+     {:basepath (xmldb/rf-path ".")
+      :xmldb xmldb
+      :turtle json-ld
+      :topic topic})))
 
 (defn topic-replace
   [topic
    {:strs [sdoc meta]}
-   {{:keys [xmldb]} :host-config :as data}]
+   {:keys [named-graph] {:keys [xmldb cannonical]} :host-config :as data}]
 
   (let [raw-validation (xmldb/run-script
                         (xmldb/rf-path "API/topic-validate.xq")
@@ -38,6 +42,10 @@
         [{:strs [valid] :as opmeta}] (xmldb/extract-parts raw-validation)]
     (if valid
       (do
+        ;; TODO: capture Jena validation errors.
+        (let [model (jena/parse-string meta cannonical "TURTLE")]
+          (rainbowfish.JenaClient/put named-graph model))
+
         (xmldb/replace-doc xmldb topic sdoc)
         (topic-get-or-default topic data))
       raw-validation)))
@@ -64,9 +72,13 @@
   [{:keys [req]
     {:keys [request-method body]} :req
     {:keys [path-params]} :match
-    {:keys [xmldb]} :host-config :as data}]
+    {:keys [xmldb cannonical]} :host-config :as data}]
   (let [[basename ext] (fu/path-to-topic (:key path-params) "topic")
-        topic (str basename "." ext)]
+        topic (str basename "." ext)
+        named-graph (str "https://" cannonical "/" basename)
+
+        ;; Overwrite data.
+        data (assoc data :named-graph named-graph)]
     (case request-method
       :get
       (->

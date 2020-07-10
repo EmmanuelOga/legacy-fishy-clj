@@ -14,6 +14,7 @@
   <!-- ******************************************************************************** -->
 
   <xsl:param name="xmldb" as="xs:string" />
+  <xsl:param name="json-ld" as="xs:string" />
 
   <xsl:variable name="root" type="xsl:sequence" select="doc('basex://' || $xmldb || '/index.topic')" />
 
@@ -27,6 +28,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="/css/index.css" />
         <script type='application/ld+json'> 
+          <xsl:value-of select="$json-ld" />
         </script>
       </head>
 

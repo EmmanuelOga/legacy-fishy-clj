@@ -4,8 +4,10 @@
  [{:path "eogadev"
    :xmldb "devoga"
    :default-author "Emmanuel Oga"
+   :cannonical "eoga.dev"
    :hosts ["eogadev" "eoga.dev"]}
    {:path "emmanueloga"
     :xmldb "comoga"
+    :cannonical "emmanueloga.com"
     :default-author "Emmanuel Oga"
     :hosts ["emmanueloga" "emmanueloga.com"]}]}

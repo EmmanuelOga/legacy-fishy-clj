@@ -5,6 +5,7 @@ declare namespace output = "http://www.w3.org/2010/xslt-xquery-serialization";
 declare variable $basepath as xs:string external;
 declare variable $xmldb as xs:string external;
 declare variable $topic as xs:string external;
+declare variable $json-ld as xs:string external;
 declare variable $content-type as xs:string external;
 
 declare option output:method 'html';
@@ -16,7 +17,7 @@ return
   if ($in) then
     let $xsl := $basepath || "/public/topic-to-html-page.xsl"
     let $out := if ($content-type = "text/html")
-                then xslt:transform($in, $xsl, map { 'xmldb' : $xmldb })
+                then xslt:transform($in, $xsl, map { 'xmldb' : $xmldb ,  'json-ld' : $json-ld })
                 else $in
     return (json:serialize(map {'code' : 200}, $json-options),
             "===BOUNDARY===",

@@ -5,6 +5,7 @@ declare namespace sd = "https://eoga.dev/sdoc";
 
 declare variable $basepath as xs:string external;
 declare variable $xmldb as xs:string external;
+declare variable $turtle as xs:string external;
 declare variable $topic as xs:string external;
 
 declare option db:chop 'no';
@@ -15,7 +16,9 @@ let $in := if (db:exists($xmldb, $topic))
                 transform with {
                   replace value of node sd:topic/sd:title with $topic
                 }
-let $html := $in => xslt:transform($basepath || "/API/topic-to-html-snippet.xsl")
+    let $html := $in => xslt:transform(
+                          $basepath || "/API/topic-to-html-snippet.xsl"
+                        )
 let $json-options := map { 'format' : 'xquery', 'indent' : 'no' }
 return (
   (: Data for the HTTPD :)
@@ -28,8 +31,8 @@ return (
 
   (: Client payload :)
   json:serialize(map {
-    'meta': file:read-text($basepath || "/API/default.ttl"),
+    'meta': $turtle,
     'sdoc': serialize($in),
-            'html': $html
+    'html': $html
   }, $json-options)
 )

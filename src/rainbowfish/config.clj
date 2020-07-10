@@ -12,9 +12,12 @@
   expands a few fields that are derived from the config."
   [config-path {:keys [basex-path sites backend] :as config}]
   (let [flatten-site
-        (fn [{:keys [path xmldb hosts]}]
+        (fn [{:keys [path xmldb hosts default-author cannonical]}]
           (let [assets-path (fu/relpath config-path ".." path)
-                host-config {:assets-path assets-path :xmldb xmldb}]
+                host-config {:default-author default-author
+                             :cannonical cannonical
+                             :assets-path assets-path
+                             :xmldb xmldb}]
             (map (fn [host] [host host-config]) hosts)))
 
         hosts
