@@ -27,5 +27,3 @@
         (slurp (io/resource "assets/tests/validate-fixtures.xq"))
         [["$schema" (slurp (io/resource "assets/schemas/sdoc.rnc"))]
          ["$fixtures-path" (fu/relpath "." "resources/assets/tests/fixtures")]]))))
-
-

@@ -1,67 +1,52 @@
 (ns rainbowfish.api
   "Implementation of the API methods."
-  (:require [clojure.tools.logging :as log]
-            [jsonista.core :as j]
-            [rainbowfish.file-util :as fu]
+  (:require [jsonista.core :as j]
+            [rainbowfish.jena :as jena]
+            [rainbowfish.topic :as t]
             [rainbowfish.xmldb :as xmldb]
-            [ring.util.request :as request]
-            [ring.util.response :as resp]
-            [rainbowfish.jena :as jena]))
-
-(defn topic-complete
-  [topic
-   {{:keys [request-method]} :req
-    {:keys [path-params]} :match
-    {:keys [xmldb]} :host-config}]
-  (-> "<wip/>"
-      (resp/response)
-      (resp/content-type "application/xml")))
+            [ring.util.request :as req]
+            [ring.util.response :as resp]))
 
 (defn topic-get-or-default
-  [topic {:keys [named-graph] {:keys [xmldb]} :host-config}]
-  (let [fetch-model (rainbowfish.JenaClient/fetch named-graph)
-        json-ld (jena/write (or fetch-model (jena/create-empty-model)) "TURTLE")]
+  [{:keys [topic-name topic-graph rdf-server xmldb]}]
+  (let [fetch-model (jena/fetch rdf-server topic-graph)
+        turtle (jena/write (or fetch-model (jena/create-empty-model)) "TURTLE")]
     (xmldb/run-script
-     (xmldb/rf-path "API/topic-get-or-init.xq")
-     {:basepath (xmldb/rf-path ".")
-      :xmldb xmldb
-      :turtle json-ld
-      :topic topic})))
+     "API/topic-get-or-init.xq"
+     {:xmldb xmldb
+      :topic-turtle turtle
+      :topic-name topic-name})))
 
 (defn topic-replace
-  [topic
-   {:strs [sdoc meta]}
-   {:keys [named-graph] {:keys [xmldb cannonical]} :host-config :as data}]
+  [{:strs [sdoc meta]}
+   {:keys [topic-name topic-graph xmldb canonical] :as request}]
 
   (let [raw-validation (xmldb/run-script
-                        (xmldb/rf-path "API/topic-validate.xq")
-                        {:xmldb xmldb
-                         :topic ""
-                         :basepath (xmldb/rf-path ".")
-                         :topic-string sdoc})
+                        "API/topic-validate.xq"
+                        {:xmldb xmldb :topic-string sdoc})
         [{:strs [valid] :as opmeta}] (xmldb/extract-parts raw-validation)]
-    (if valid
+    (if-not valid
+      raw-validation
       (do
         ;; TODO: capture Jena validation errors.
-        (let [model (jena/parse-string meta cannonical "TURTLE")]
-          (rainbowfish.JenaClient/put named-graph model))
+        (let [model (jena/parse-string meta canonical "TURTLE")]
+          (jena/put topic-graph model))
 
-        (xmldb/replace-doc xmldb topic sdoc)
-        (topic-get-or-default topic data))
-      raw-validation)))
+        (xmldb/replace-doc xmldb topic-name sdoc)
+        (topic-get-or-default request)))))
 
 (defn topic-delete
-  [topic
-   {{:keys [xmldb]} :host-config :as data}]
-  (xmldb/delete-doc xmldb topic)
+  [{:keys [topic-name topic-graph rdf-server xmldb]}]
+  (jena/delete rdf-server topic-graph)
+  (xmldb/delete-doc xmldb topic-name)
   (->
-   (resp/response (j/write-value-as-string {:result (str "Deleted " topic)}))
+   (resp/response (j/write-value-as-string
+                   {:results (str "Deleted " topic-name)}))
    (resp/content-type "application/json")))
 
-(defn interpret-result
+(defn interpret-topic-response
   [basex-response]
-  (let [[{:strs [code content-type]} payload]
-        (xmldb/extract-parts basex-response)]
+  (let [[{:strs [code content-type]} payload] (xmldb/extract-parts basex-response)]
     (-> (if (and (>= code 200) (< code 300))
           (resp/response payload)
           (resp/bad-request payload))
@@ -69,32 +54,25 @@
 
 (defn topic
   "Performs different topic operations depending on HTTP method."
-  [{:keys [req]
-    {:keys [request-method body]} :req
-    {:keys [path-params]} :match
-    {:keys [xmldb cannonical]} :host-config :as data}]
-  (let [[basename ext] (fu/path-to-topic (:key path-params) "topic")
-        topic (str basename "." ext)
-        named-graph (str "https://" cannonical "/" basename)
-
-        ;; Overwrite data.
-        data (assoc data :named-graph named-graph)]
+  [{:keys [request-method body] :as request}]
+  (let [request (merge request (t/request-to-topic request))]
     (case request-method
       :get
       (->
-       (topic-get-or-default topic data)
-       (interpret-result))
-
-      :delete
-      (topic-delete topic data)
+       (topic-get-or-default request)
+       (interpret-topic-response))
 
       :put
-      (let [encoding (or (request/character-encoding req) "UTF-8")
+      (let [encoding (or (req/character-encoding request) "UTF-8")
             body-parsed (j/read-value (slurp body :encoding encoding))]
         (->
-         (topic-replace topic body-parsed data)
+         (topic-replace body-parsed request)
          (interpret-result)))
 
+      :delete
+      (topic-delete)
+
       (-> (resp/bad-request
-           (str "{ \"error\" : \"Unknown request" request-method "\" }"))
-          (resp/content-type "application/json")))))
+           (j/write-value-as-string
+            {:req-errors (str  "Unknown request " request-method)}
+            (resp/content-type "application/json")))))))

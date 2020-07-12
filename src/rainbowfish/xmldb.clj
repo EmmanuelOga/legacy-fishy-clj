@@ -70,16 +70,18 @@
              (callback query sess))))))
 
 (defn run-script
-  [path bindings-map]
+  [rel-path bindings-map]
   (let [escape-kv (fn [[k v]]
                     (str "$" (name k) "=" (str/replace v "," ",,")))
-        bindings (str/join ", " (map escape-kv bindings-map))
+        ;; User provided bindings plus the default ones.
+        all-bindings (merge {:basepath (rf-path ".")} bindings-map)
+        bindings (str/join ", " (map escape-kv all-bindings))
         exec (fn [sess cmd]
                (.execute sess cmd))]
     (open (fn [sess]
             (when-not (empty? bindings)
               (exec sess (str "SET BINDINGS " bindings)))
-            (exec sess (str "RUN " path))))))
+            (exec sess (str "RUN " (rf-path rel-path)))))))
 
 (defn delete-doc
   [xmldb path]

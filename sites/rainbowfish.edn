@@ -1,13 +1,20 @@
 {:basex-path "./basex"
- :backend {:port 9876}
+
+ :http-api-port 9876
+
+ :jena-embedded true
+ :jena-port 3330
+
+ :rdf-server "http://localhost:3030/ds"
+
  :sites
  [{:path "eogadev"
    :xmldb "devoga"
    :default-author "Emmanuel Oga"
-   :cannonical "eoga.dev"
+   :canonical "https://eoga.dev"
    :hosts ["eogadev" "eoga.dev"]}
    {:path "emmanueloga"
     :xmldb "comoga"
-    :cannonical "emmanueloga.com"
+    :canonical "https://emmanueloga.com"
     :default-author "Emmanuel Oga"
     :hosts ["emmanueloga" "emmanueloga.com"]}]}

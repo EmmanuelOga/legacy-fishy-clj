@@ -70,6 +70,10 @@
   [^String uri ^String namedGraph]
   (build-conn uri (fn [conn] (.fetch conn namedGraph))))
 
+(defn delete
+  [^String uri ^String namedGraph]
+  (build-conn uri (fn [conn] (.delete conn namedGraph))))
+
 (defn put
   [^String uri ^String namedGraph ^Model model]
   (build-conn uri (fn [conn] (.put conn namedGraph model))))

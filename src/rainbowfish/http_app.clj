@@ -16,29 +16,35 @@
         (assoc-in [:session :n] (inc n)))))
 
 (defn handler
-  "The host on the request should be set and match against one of the
-  site hosts on the configuration."
-  [req]
-  (let [host (or (get-in req [:headers "x-forwarded-server"])
-                 (:server-name req))]
+  [{:keys [request-path assets-path] :as request}]
+  (or
+   (@#'public/handle-topic request)
+   (when-let [match (r/match-by-path routes/API request-path)]
+     (@(:result match) (assoc request :route-match match)))
+   (resp/not-found "Resource not found.")))
 
-    (or
-     (when-let [{:keys [assets-path] :as host-config}
-                (get-in (config/config) [:hosts host])]
-
+(defn find-host-config
+  [handler]
+  (fn
+    ([{:keys [request-method server-name headers] :as request}]
+     (let [request-host (or (headers  "x-forwarded-server") server-name)
+           {:keys [hosts rdf-server]} (config/config)
+           host-config (hosts request-host)]
        (or
-        (when-let [match (r/match-by-path routes/API (req/path-info req))]
-          (@(:result match) {:req req :match match :host-config host-config}))
-
-        (ring-file/file-request req (str assets-path "/static"))
-
-        (@#'public/handle-topic {:req req :host-config host-config})))
-
-     (resp/not-found "Resource not found."))))
+        (when-not host-config (resp/not-found "Resource not found."))
+        (ring-file/file-request request (str (:assets-path host-config) "/static"))
+        (handler (merge request
+                        host-config
+                        {:request-host request-host
+                         :request-path (req/path-info request)
+                         :rdf-server rdf-server})))))
+    ([request respond raise]
+     (handler respond raise))))
 
 (defn app
   "Rainbowfish ring application."
   []
   (-> handler
+      find-host-config
       params/wrap-params
       sess/wrap-session))

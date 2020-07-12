@@ -79,3 +79,13 @@
       (str base "/" (or name "index")))
      (or ext extension)]))
 
+(defn join
+  [path1 path2]
+  (cond
+    (or (nil? path1) (nil? path2))
+    (or path1 path2)
+    :else
+    (str (if (str/ends-with? path1 "/")
+           path1
+           (str path1 "/"))
+         (remove-base-slash path2))))
