@@ -3,17 +3,20 @@
   (:require [rainbowfish.jena :as jena]
             [rainbowfish.topic :as t]
             [rainbowfish.xmldb :as xmldb]
-            [ring.util.response :as resp]))
+            [ring.util.response :as resp]
+            [clojure.tools.logging :as log]))
 
 (defn topic-get
   [{:keys [rdf-server xmldb topic-name topic-graph topic-content-type] :as request}]
+  (log/info "topic-get" [rdf-server xmldb topic-name topic-graph topic-content-type])
   (let [json-ld (jena/write (or (jena/fetch rdf-server topic-graph)
                                 (jena/create-empty-model)))]
-    (xmldb/run-script "public/topic-get.xq"
-                      {:xmldb xmldb
-                       :topic-name topic-name
-                       :topic-json-ld json-ld
-                       :topic-content-type topic-content-type})))
+    (xmldb/run-script
+     "public/topic-get.xq"
+     {:xmldb xmldb
+      :topic-name topic-name
+      :topic-json-ld json-ld
+      :topic-content-type topic-content-type})))
 
 (defn handle-topic
   [{:keys [request-method] :as request}]

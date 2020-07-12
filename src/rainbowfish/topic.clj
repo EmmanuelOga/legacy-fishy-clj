@@ -14,9 +14,10 @@
   "Converts a request path to a [topic-name extension] tuple."
   [{:keys [request-path canonical]}]
   (let [[topic-path topic-basename topic-ext] (fu/get-base-name-and-ext request-path)
+        topic-basename (or topic-basename "index")
         topic-ext (or topic-ext "html")
-        topic-name (str (fu/join topic-path (str topic-basename ".topic")))]
+        topic-name (fu/join topic-path (str topic-basename ".topic"))]
     (when-let [content-type (topic-content-types topic-ext)]
-      {:topic-name (fu/join "" topic-name)
+      {:topic-name (fu/remove-base-slash topic-name)
        :topic-graph (fu/join canonical topic-name)
        :topic-content-type content-type})))

@@ -5,7 +5,7 @@
  :jena-embedded true
  :jena-port 3330
 
- :rdf-server "http://localhost:3030/ds"
+ :rdf-server "http://localhost:3330/ds"
 
  :sites
  [{:path "eogadev"

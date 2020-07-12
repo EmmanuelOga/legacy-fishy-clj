@@ -31,9 +31,8 @@
         limit (or (and (map? query) (query "limit")) "")
         src (if (= list-filter "true")
               (xmldb/run-script
-               (xmldb/rf-path "API/topic-list.xq")
-               {:basepath (xmldb/rf-path ".")
-                :xmldb uri-host
+               "API/topic-list.xq"
+               {:xmldb uri-host
                 :path uri-path
                 :limit limit})
               ;; Return a single topic.
