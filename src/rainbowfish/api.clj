@@ -7,6 +7,14 @@
             [ring.util.request :as req]
             [ring.util.response :as resp]))
 
+(defn interpret-topic-response
+  [basex-response]
+  (let [[{:strs [code content-type]} payload] (xmldb/extract-parts basex-response)]
+    (-> (if (and (>= code 200) (< code 300))
+          (resp/response payload)
+          (resp/bad-request payload))
+        (resp/content-type content-type))))
+
 (defn topic-get-or-default
   [{:keys [topic-name topic-graph rdf-server xmldb canonical]}]
   (let [meta-model (or (jena/fetch rdf-server topic-graph)
@@ -22,19 +30,24 @@
   [{:strs [sdoc meta]}
    {:keys [topic-name topic-graph rdf-server xmldb canonical] :as request}]
 
-  (let [raw-validation (xmldb/run-script
-                        "API/topic-validate.xq"
-                        {:xmldb xmldb :topic-string sdoc})
-        [{:strs [valid] :as opmeta}] (xmldb/extract-parts raw-validation)]
-    (if-not valid
-      raw-validation
+  (let [sdoc-validation (xmldb/run-script
+                         "API/topic-validate.xq"
+                         {:xmldb xmldb :topic-string sdoc})
+        [{:strs [valid] :as opmeta}] (xmldb/extract-parts sdoc-validation)
+        model (jena/parse-string meta canonical "TURTLE")
+        jena-error (map? model)]
+    (if (or (not valid) jena-error)
+      (let [meta-validation {:meta-errors (if (map? model) [model] [])}
+            payload (merge (j/read-value sdoc-validation) meta-validation)]
+        (->
+         (resp/bad-request (j/write-value-as-string payload))
+         (resp/content-type "application/json")))
       (do
-        ;; TODO: capture Jena validation errors.
-        (let [model (jena/parse-string meta canonical "TURTLE")]
-          (jena/put rdf-server topic-graph model))
-
+        (jena/put rdf-server topic-graph model)
         (xmldb/replace-doc xmldb topic-name sdoc)
-        (topic-get-or-default request)))))
+        (->
+         (topic-get-or-default request)
+         (interpret-topic-response))))))
 
 (defn topic-delete
   [{:keys [topic-name topic-graph rdf-server xmldb]}]
@@ -44,14 +57,6 @@
    (resp/response (j/write-value-as-string
                    {:results (str "Deleted " topic-name)}))
    (resp/content-type "application/json")))
-
-(defn interpret-topic-response
-  [basex-response]
-  (let [[{:strs [code content-type]} payload] (xmldb/extract-parts basex-response)]
-    (-> (if (and (>= code 200) (< code 300))
-          (resp/response payload)
-          (resp/bad-request payload))
-        (resp/content-type content-type))))
 
 (defn topic
   "Performs different topic operations depending on HTTP method."
@@ -68,9 +73,7 @@
       :put
       (let [encoding (or (req/character-encoding request) "UTF-8")
             body-parsed (j/read-value (slurp body :encoding encoding))]
-        (->
-         (topic-replace body-parsed request)
-         (interpret-topic-response)))
+         (topic-replace body-parsed request))
 
       :delete
       (topic-delete request)

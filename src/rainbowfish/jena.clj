@@ -6,7 +6,9 @@
            org.apache.jena.fuseki.main.FusekiServer
            org.apache.jena.query.DatasetFactory
            [org.apache.jena.rdf.model Model ModelFactory]
-           org.apache.jena.rdfconnection.RDFConnectionFuseki))
+           org.apache.jena.rdfconnection.RDFConnectionFuseki
+           org.apache.jena.riot.RiotParseException
+           org.apache.jena.riot.system.ErrorHandlerFactory))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; IO
@@ -27,8 +29,18 @@
      (.read model input-stream base-url format))))
 
 (defn parse-string
-  ([input base-url format]
-   (parse  (str-stream input) base-url format)))
+  [input base-url format]
+  ;; A bit messy but this ensures the error handler returns the line
+  ;; and col. TODO: use a RDFParserBuilder.
+  (ErrorHandlerFactory/setDefaultErrorHandler
+   (ErrorHandlerFactory/errorHandlerDetailed))
+  (try
+    (parse (str-stream input) base-url format)
+    (catch RiotParseException e
+      {:level "error"
+       :line (.getLine e)
+       :column (.getCol e)
+       :message (.getOriginalMessage e)})))
 
 (defn write
   ([model] (write model "JSON-LD"))

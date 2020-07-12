@@ -57,15 +57,18 @@
     :body (-> (clj->js {:meta meta :sdoc sdoc})
               js/JSON.stringify)}
    (fn [status result]
-     (let [sdoc-errors (js->clj (gob/get result "sdoc-errors" #js []))]
+     (let [sdoc-errors (js->clj (gob/get result "sdoc-errors" #js []))
+           meta-errors (js->clj (gob/get result "meta-errors" #js []))]
        (topicmod-update
         key
         (if (= 200 status)
           {:sdoc-errors sdoc-errors
+           :meta-errors meta-errors
            :meta (gob/get result "meta")
            :sdoc (gob/get result "sdoc")
            :html (gob/get result "html")}
           {:sdoc-errors sdoc-errors
+           :meta-errors meta-errors
            :meta meta
            :sdoc sdoc
            :html html}))))))
@@ -79,7 +82,7 @@
    [:span.message message]])
 
 (defn topicmod
-  [{:keys [key path path-count sdoc meta html sdoc-errors] :as payload}]
+  [{:keys [key path path-count sdoc meta html sdoc-errors meta-errors] :as payload}]
   (fn []
     (let [sdoc-key (str key "-sdoc")
           meta-key (str key "-meta")
@@ -109,7 +112,8 @@
         [:div.meta
          [:details {:open true}
           [:summary "Meta"]
-          [:div.status]
+          [:div.status
+           (doall (map-indexed error-detail meta-errors))]
           [codem/create meta-key meta {:mode "text/turtle"}]]]
         [:div.topic
          [:details {:open true}
