@@ -67,7 +67,7 @@
             body-parsed (j/read-value (slurp body :encoding encoding))]
         (->
          (topic-replace body-parsed request)
-         (interpret-result)))
+         (interpret-topic-response)))
 
       :delete
       (topic-delete)

@@ -6,7 +6,7 @@
   (r/router
    ["/_RF_"
 
-    ["/complete-topic/*key"
+    #_["/complete-topic/*key"
      {:name ::complete-topic
       #?@(:clj [:handler #'api/topic-complete])}]
 
