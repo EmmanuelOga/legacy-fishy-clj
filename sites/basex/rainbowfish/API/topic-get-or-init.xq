@@ -14,7 +14,8 @@ let $in := if (db:exists($xmldb, $topic-name))
            then db:open($xmldb, $topic-name)
            else fn:parse-xml(file:read-text($basepath || "/API/default.topic"))
                 transform with {
-                  replace value of node sd:topic/sd:title with $topic
+                  replace value of node sd:topic/sd:title with $topic-name,
+                  replace value of node sd:topic//sd:body/@title with $topic-name
                 }
     let $html := $in => xslt:transform(
                           $basepath || "/API/topic-to-html-snippet.xsl"

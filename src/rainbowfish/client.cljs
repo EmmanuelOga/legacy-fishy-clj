@@ -40,7 +40,7 @@
 (defn topicmod-delete
   [{:keys [key path] :as data}]
   (dom/request
-   (dom/url (routes/topic-by-path path))
+   (dom/url (routes/topic-by-name path))
    {:method "DELETE" :headers {:Content-Type "application/json"}}
    (fn [status result]
      (js/console.log status result)
@@ -51,7 +51,7 @@
 (defn topicmod-save
   [{:keys [key path meta sdoc html]}]
   (dom/request
-   (dom/url (routes/topic-by-path path))
+   (dom/url (routes/topic-by-name path))
    {:method "PUT"
     :headers {:Content-Type "application/json"}
     :body (-> (clj->js {:meta meta :sdoc sdoc})
@@ -138,16 +138,13 @@
   (let [query (rc/atom "")]
     (fn []
       (let [get-valid-query
-            (fn []
-              (let [val @query]
-                (when (not (empty? val)))
-                (if (str/starts-with? val "/") val (str "/" val))))
+            (fn [] (let [val @query] (when (not (empty? val)) val)))
 
             attempt-open-topic
             (fn []
               (when-let [query (get-valid-query)]
                 (dom/request
-                 (dom/url (routes/topic-by-path query))
+                 (dom/url (routes/topic-by-name query))
                  {:method "GET" :headers {:Content-Type "application/json"}}
                  (fn [status result]
                    (if (= status 200)

@@ -8,9 +8,10 @@
             [ring.util.response :as resp]))
 
 (defn topic-get-or-default
-  [{:keys [topic-name topic-graph rdf-server xmldb]}]
-  (let [fetch-model (jena/fetch rdf-server topic-graph)
-        turtle (jena/write (or fetch-model (jena/create-empty-model)) "TURTLE")]
+  [{:keys [topic-name topic-graph rdf-server xmldb canonical]}]
+  (let [meta-model (or (jena/fetch rdf-server topic-graph)
+                       (jena/parse (xmldb/rf-path "API/default.ttl") canonical "TURTLE"))
+        turtle (jena/write meta-model "TURTLE")]
     (xmldb/run-script
      "API/topic-get-or-init.xq"
      {:xmldb xmldb
@@ -19,7 +20,7 @@
 
 (defn topic-replace
   [{:strs [sdoc meta]}
-   {:keys [topic-name topic-graph xmldb canonical] :as request}]
+   {:keys [topic-name topic-graph rdf-server xmldb canonical] :as request}]
 
   (let [raw-validation (xmldb/run-script
                         "API/topic-validate.xq"
@@ -30,7 +31,7 @@
       (do
         ;; TODO: capture Jena validation errors.
         (let [model (jena/parse-string meta canonical "TURTLE")]
-          (jena/put topic-graph model))
+          (jena/put rdf-server topic-graph model))
 
         (xmldb/replace-doc xmldb topic-name sdoc)
         (topic-get-or-default request)))))
@@ -54,8 +55,10 @@
 
 (defn topic
   "Performs different topic operations depending on HTTP method."
-  [{:keys [request-method body] :as request}]
-  (let [request (merge request (t/request-to-topic request))]
+  [{:keys [request-method body route-match canonical] :as request}]
+  (let [topic-name (get-in route-match [:path-params :topic-name])
+        request (merge request (t/request-to-topic {:canonical canonical
+                                                    :request-path (str topic-name)}))]
     (case request-method
       :get
       (->
@@ -70,7 +73,7 @@
          (interpret-topic-response)))
 
       :delete
-      (topic-delete)
+      (topic-delete request)
 
       (-> (resp/bad-request
            (j/write-value-as-string

@@ -18,9 +18,9 @@
 (defn handler
   [{:keys [request-path assets-path] :as request}]
   (or
-   (@#'public/handle-topic request)
    (when-let [match (r/match-by-path routes/API request-path)]
      (@(:result match) (assoc request :route-match match)))
+   (@#'public/handle-topic request)
    (resp/not-found "Resource not found.")))
 
 (defn find-host-config

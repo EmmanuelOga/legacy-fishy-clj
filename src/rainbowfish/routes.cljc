@@ -6,16 +6,16 @@
   (r/router
    ["/_RF_"
 
-    #_["/complete-topic/*key"
+    #_["/complete-topic/*topic-name"
      {:name ::complete-topic
       #?@(:clj [:handler #'api/topic-complete])}]
 
-    ["/topics/*key"
-     {:name ::topic-by-path
+    ["/topics/*topic-name"
+     {:name ::topic-by-name
       #?@(:clj [:handler #'api/topic])}]]))
 
-(defn topic-by-path
-  [query]
-  (:path (r/match-by-name API ::topic-by-path {:key query})))
+(defn topic-by-name
+  [topic-name]
+  (:path (r/match-by-name API ::topic-by-name {:topic-name topic-name})))
 
 
