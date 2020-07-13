@@ -3,6 +3,7 @@
  :http-api-port 9876
 
  :jena-embedded true
+ :jena-path "./jena"
  :jena-port 3330
 
  :rdf-server "http://localhost:3330/ds"

@@ -5,6 +5,7 @@
   (:import org.apache.jena.atlas.web.HttpException
            org.apache.jena.fuseki.main.FusekiServer
            org.apache.jena.query.DatasetFactory
+           org.apache.jena.tdb2.TDB2Factory
            [org.apache.jena.rdf.model Model ModelFactory]
            org.apache.jena.rdfconnection.RDFConnectionFuseki
            org.apache.jena.riot.RiotParseException
@@ -109,10 +110,10 @@
   (swap!
    server
    (fn [old-server]
-     (let [options (config/config)]
+     (let [config (config/config)]
        (when old-server (.stop old-server))
 
-       (let [ds (DatasetFactory/createTxnMem)
+       (let [ds (TDB2Factory/createDataset (config :jena-path))
              fuseki (-> (FusekiServer/create)
                         (.add "/ds" ds)
                         (.build))]

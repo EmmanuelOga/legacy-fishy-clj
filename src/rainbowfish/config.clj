@@ -10,7 +10,7 @@
 (defn expand-config
   "Given the config path and the result of reading the EDN at that file,
   expands a few fields that are derived from the config."
-  [config-path {:keys [basex-path sites backend] :as config-from-file}]
+  [config-path {:keys [basex-path jena-path sites backend] :as config-from-file}]
   (let [flatten-site
         (fn [{:keys [path xmldb hosts default-author canonical]}]
           (let [assets-path (fu/relpath config-path ".." path)
@@ -24,12 +24,13 @@
         (->> (mapcat flatten-site sites)
              (apply concat)
              (apply hash-map))]
-    ;; Basex path is relative to config file.
-    ;; Parameters from sites are used to compute hosts.
-    ;; Keep every other setting on the file as it was.
     (merge
-     (dissoc config-from-file :sites :basex-path)
+     ;; Basex path is relative to config file.
+     ;; Parameters from sites are used to compute hosts.
+     ;; Keep every other setting on the file as it was.
+     (dissoc config-from-file :sites :basex-path :jena-path)
      {:basex-path (fu/relpath config-path ".." basex-path)
+      :jena-path (fu/relpath config-path ".." jena-path)
       :hosts hosts}
      @cli-params)))
 
