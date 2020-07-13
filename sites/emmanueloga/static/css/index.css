@@ -3,7 +3,6 @@
   --text-color-bright: rgba(0, 0, 128);
   --text-color-dim: rgba(0, 0, 72);
   --banner-height: 6rem;
-  --padding-content: 0 1rem;
 }
 
 * {
@@ -55,10 +54,11 @@ body {
 .main-content {
   flex: 1;
   width: 100%;
-  max-width: 80rem;
+  max-width: 120rem;
   margin: 0 auto;
   z-index: 1;
   background-color: white;
+  position: relative;
 }
 
 .main-footer {
@@ -76,7 +76,7 @@ body {
   background-color: black;
   color: white;
   height: var(--banner-height);
-  padding: var(--padding-content);
+  padding-left: 1rem;
 }
 
 .main-header a {
@@ -91,16 +91,27 @@ body {
   flex: 1;
 }
 
-.main-header nav {
-  padding: 0 2rem;
+.main-header nav a {
+    padding: 1rem 1rem 0 0;
 }
 
-.main-header nav a {
-  padding: 1rem;
-}
+/*******************************************************************************/
 
 .main-body {
-  padding: var(--padding-content);
+  display: flex;
+}
+
+.main-body aside {
+  padding: 0 1rem;
+  position: sticky;
+  top: 1rem;
+  align-self: flex-start;
+  flex: 0.4;
+}
+
+.main-body main {
+  margin: 0 1rem;
+  flex: 1;
 }
 
 /*******************************************************************************/

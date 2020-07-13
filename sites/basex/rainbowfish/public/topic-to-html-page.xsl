@@ -39,14 +39,22 @@
             <xsl:apply-templates select="(sd:header, $root//sd:header)[1]/*" />
           </header>
 
-          <main class="main-body clear">
-            <xsl:if test="sd:body/@title" expand-text="yes">
-              <h2>{sd:body/@title}</h2>
-            </xsl:if>
-            <xsl:apply-templates select="(sd:body, sd:description)[1]/*" />
-          </main>
+          <div class="main-body clear">
+            <aside class="nav-tree">
+            </aside>
+
+            <main class="content">
+              <xsl:if test="sd:body/@title" expand-text="yes">
+                <h2>{sd:body/@title}</h2>
+              </xsl:if>
+              <xsl:apply-templates select="(sd:body, sd:description)[1]/*" />
+            </main>
+
+            <aside class="current-tree">
+            </aside>
+          </div>
         </div>
-  
+
         <footer class="main-footer clear">
           <xsl:apply-templates select="(sd:footer, $root//sd:footer)[1]/*" />
         </footer>
