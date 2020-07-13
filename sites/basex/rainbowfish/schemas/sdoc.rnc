@@ -12,6 +12,9 @@ start = sdoc-element-topic
 sdoc-element-topic = element topic {
   attribute creation-date { xs:date } ? &
   attribute pub-date { xs:date } ? &
+  attribute nav-from { text } ? &
+  attribute show-nav { xs:boolean } ? &
+  attribute show-toc { xs:boolean } ? &
 
   element title { text } &
 

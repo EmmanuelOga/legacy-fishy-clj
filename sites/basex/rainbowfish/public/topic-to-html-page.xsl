@@ -40,8 +40,11 @@
           </header>
 
           <div class="main-body clear">
-            <aside class="nav-tree">
-            </aside>
+            <xsl:if test="@show-nav">
+              <aside class="nav-tree">
+                NAV
+              </aside>
+            </xsl:if>
 
             <main class="content">
               <xsl:if test="sd:body/@title" expand-text="yes">
@@ -50,8 +53,11 @@
               <xsl:apply-templates select="(sd:body, sd:description)[1]/*" />
             </main>
 
-            <aside class="current-tree">
-            </aside>
+            <xsl:if test="@show-toc">
+              <aside class="toc-tree">
+                TOC
+              </aside>
+            </xsl:if>
           </div>
         </div>
 
