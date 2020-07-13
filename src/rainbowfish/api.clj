@@ -30,10 +30,10 @@
   [{:strs [sdoc meta]}
    {:keys [topic-name topic-graph rdf-server xmldb canonical] :as request}]
 
-  (let [sdoc-validation (xmldb/run-script
-                         "API/topic-validate.xq"
-                         {:xmldb xmldb :topic-string sdoc})
-        [{:strs [valid] :as opmeta}] (xmldb/extract-parts sdoc-validation)
+  (let [sdoc-result (xmldb/run-script
+                     "API/topic-validate.xq"
+                     {:xmldb xmldb :topic-string sdoc})
+        [{:strs [valid] :as opmeta} sdoc-validation] (xmldb/extract-parts sdoc-result)
         model (jena/parse-string meta canonical "TURTLE")
         jena-error (map? model)]
     (if (or (not valid) jena-error)
@@ -73,7 +73,7 @@
       :put
       (let [encoding (or (req/character-encoding request) "UTF-8")
             body-parsed (j/read-value (slurp body :encoding encoding))]
-         (topic-replace body-parsed request))
+        (topic-replace body-parsed request))
 
       :delete
       (topic-delete request)
