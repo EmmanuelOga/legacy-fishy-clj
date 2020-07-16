@@ -4,12 +4,11 @@
             [rainbowfish.config :as config])
   (:import org.apache.jena.atlas.web.HttpException
            org.apache.jena.fuseki.main.FusekiServer
-           org.apache.jena.query.DatasetFactory
-           org.apache.jena.tdb2.TDB2Factory
            [org.apache.jena.rdf.model Model ModelFactory]
            org.apache.jena.rdfconnection.RDFConnectionFuseki
            org.apache.jena.riot.RiotParseException
-           org.apache.jena.riot.system.ErrorHandlerFactory))
+           org.apache.jena.riot.system.ErrorHandlerFactory
+           org.apache.jena.tdb2.TDB2Factory))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; IO
@@ -50,7 +49,7 @@
      (.write model buffer format)
      (str buffer))))
 
-(def ^:dynamic *max-print* 500)
+(def ^:dynamic *max-print* 20)
 
 ; Extend print to understand Jena models.
 (defmethod print-method Model [v ^java.io.Writer w]
