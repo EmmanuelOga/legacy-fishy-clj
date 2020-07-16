@@ -10,3 +10,9 @@
   (xmldb/restart)
   (jena/restart)
   (httpd/restart))
+
+(defn stop
+  []
+  (xmldb/stop)
+  (jena/stop)
+  (httpd/stop))

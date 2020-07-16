@@ -1,7 +1,8 @@
 (ns rainbowfish.jena
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
-            [rainbowfish.config :as config])
+            [rainbowfish.config :as config]
+            [rainbowfish.rdf :as rdf])
   (:import org.apache.jena.atlas.web.HttpException
            org.apache.jena.fuseki.main.FusekiServer
            [org.apache.jena.rdf.model Model ModelFactory]
@@ -64,6 +65,29 @@
     (.write w "\n\n")
     (run! (fn [s] (.add sample s)) (take *max-print* statements))
     (.write w (write sample "N3"))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Access
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn values-of
+  [model prop]
+  (-> (.listObjectsOfProperty model (rdf/prop prop)) iterator-seq))
+
+(defn value-of
+  [model prop]
+  (-> (values-of model prop) first))
+
+(defn map-of
+  [model props]
+  (let [extract
+        (fn [prop]
+          [prop
+           (->> (rdf/prop prop)
+                (.getProperty model)
+                .getObject
+                str)])]
+    (into {} (map extract props))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Remote connections

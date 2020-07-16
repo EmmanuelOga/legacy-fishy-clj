@@ -1,4 +1,5 @@
-(ns rainbowfish.rdf)
+(ns rainbowfish.rdf
+  (:require [rainbowfish.jena :as jena]))
 
 (def uri
   "List of commonly used uri prefixes"
@@ -14,8 +15,6 @@
    :saxon "http://saxon.sf.net/"
    :xsl "http://www.w3.org/1999/XSL/Transform"
 
-   ; From the validating RDF book.
-   (keyword ":") "http://example.org/"
    :ex "http://example.org/"
    :cdt "http://example.org/customDataTypes#"
    :cex "http://purl.org/weso/computex/ontology#"
@@ -32,3 +31,12 @@
    :eo "https://emmanueloga.com/"
    :rp "https://eoga.dev/rdfpub/"
    :sd "https://eoga.dev/sdoc/"})
+
+(def m (jena/create-empty-model))
+
+(defn prop
+  [kw-slash-name]
+  (let [ns (.getNamespace kw-slash-name)
+        uri ((keyword ns) uri)
+        name (.getName kw-slash-name)]
+    (.getProperty m uri name)))

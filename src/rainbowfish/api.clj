@@ -1,7 +1,9 @@
 (ns rainbowfish.api
   "Implementation of the API methods."
-  (:require [jsonista.core :as j]
+  (:require [clojure.java.io :as io]
+            [jsonista.core :as j]
             [rainbowfish.jena :as jena]
+            [rainbowfish.shacl :as shacl]
             [rainbowfish.topic :as t]
             [rainbowfish.xmldb :as xmldb]
             [ring.util.request :as req]
@@ -26,6 +28,10 @@
       :topic-turtle turtle
       :topic-name topic-name})))
 
+(def shacl-shapes
+  (jena/parse
+   (io/resource "public/schema-org-shacle.ttl") "https://schema.org" "TURTLE"))
+
 (defn topic-replace
   [{:strs [sdoc meta]}
    {:keys [topic-name topic-graph rdf-server xmldb canonical] :as request}]
@@ -35,10 +41,21 @@
                      {:xmldb xmldb :topic-string sdoc})
         [{:strs [valid] :as opmeta} sdoc-validation] (xmldb/extract-parts sdoc-result)
         model (jena/parse-string meta canonical "TURTLE")
-        jena-error (map? model)]
-    (if (or (not valid) jena-error)
+        jena-error (map? model)
+        shacl-errors (if jena-error [] (map
+                                        (fn [report] {:level "error"
+                                                      :line 1
+                                                      :column 1
+                                                      :message (str
+                                                                (report :sh/resultPath)
+                                                                "... "
+                                                                (report :sh/resultMessage))})
+                                        (shacl/validation-errors model shacl-shapes)))]
+    (if (or (not valid) jena-error (not (empty? shacl-errors)))
       (let [meta-validation {:meta-errors (if (map? model) [model] [])}
-            payload (merge (j/read-value sdoc-validation) meta-validation)]
+            payload (merge (j/read-value sdoc-validation)
+                           meta-validation
+                           {:shacl-errors shacl-errors})]
         (->
          (resp/bad-request (j/write-value-as-string payload))
          (resp/content-type "application/json")))
